@@ -11,6 +11,7 @@
   could be called.  That way it's a generic action that could be used in any task.
 """
 
+
 import ev3dev.ev3 as ev3
 import math
 import time
@@ -21,3 +22,18 @@ class Snatch3r(object):
     
     # TODO: Implement the Snatch3r class as needed when working the sandox exercises
     # (and delete these comments)
+    def drive_inches(self, inches, speed):
+        """ Drive the robert a fixed numbr of inches with constant speed
+        :param inches: inches
+        :param speed: inches/seconds
+        :return: none
+        """
+    # TODO:
+
+    def turn_degrees(self, degress, speed):
+        """ Turns a set of degrees, positive is left turn
+        :param degress: degrees
+        :param speed: degrees/seconds
+        :return:
+        """
+    # TODO
