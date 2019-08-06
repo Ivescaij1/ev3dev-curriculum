@@ -101,7 +101,7 @@ import time
 
 def main():
     print("--------------------------------------------")
-    print("  Timed Driving")
+    print("  Timed Driving  ")
     print("--------------------------------------------")
     ev3.Sound.speak("Timed Driving").wait()
 
