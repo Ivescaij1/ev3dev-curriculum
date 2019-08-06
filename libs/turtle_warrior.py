@@ -86,7 +86,7 @@ class Monster(object):
         self.lv = lv
 
         random_bonus = random.randint(0, self.lv)
-        self.str = 10 + random_bonus
+        self.str = 9 + self.lv + random_bonus
         self.exp = self.lv + random_bonus
         self.hp = self.lv * 6 + random_bonus * 3
 
