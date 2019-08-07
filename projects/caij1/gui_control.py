@@ -121,7 +121,7 @@ def main():
 
 
     def text_director(inputs):
-        textbox.insert('1.0', inputs, 'center')
+        textbox.insert('0.1', inputs, 'center')
 
     sys.stdout.write = text_director  # whenever sys.stdout.write is called, redirector is called.
     root.grid_rowconfigure([1, 2, 3], weight=1)
