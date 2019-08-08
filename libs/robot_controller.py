@@ -37,3 +37,14 @@ class Snatch3r(object):
         :return:
         """
     # TODO
+
+    def arm_up(self):
+
+
+    def arm_down(self):
+
+
+    def main_sensor(self):
+
+
+    def color_sensor(self):
