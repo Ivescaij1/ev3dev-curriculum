@@ -1,56 +1,90 @@
-import tkinter
+import tkinter as tk
 from tkinter import ttk
 import sys
 
 
 def main():
 
-    root = tkinter.Tk()
+    root = tk.Tk()
     root.title("Game Control")
 
-    # grid(0, 1-3): Empty frame that holds left and right buttons frame always in same size
+    # grid(0, 1-3) & (1-3, 0): Empty frame that holds left and right buttons frame always in same size
     # TODO: check width after button is done
-    top_bar_left = ttk.Frame(root, width=300, height=0)
+    top_bar_left = tk.Frame(root, width=300, height=0)
     top_bar_left.grid(row=0, column=1)
+    top_bar_right = ttk.Frame(root, width=1080, height=0)
+    top_bar_right.grid(row=0, column=2)
     top_bar_right = ttk.Frame(root, width=300, height=0)
     top_bar_right.grid(row=0, column=3)
 
+    side_bar_top = tk.Frame(root, width=0, height=75)
+    side_bar_top.grid(row=1, column=0)
+
     # grid(1,1): TOP left frame that contain the position label and entry box
     # 3 column, 2 row used, with one free column/row for stikcy room
-    position_frame = ttk.Frame(root, padding=10)
+    position_frame = tk.Frame(root, bg='orange red')
     position_frame.grid(row=1, column=1, sticky="nsew")
     position_frame.grid_rowconfigure([0, 3], weight=1)
     position_frame.grid_columnconfigure([0, 4], weight=1)
 
-    position_label = ttk.Label(position_frame, text="Position")
+    position_label = tk.Label(position_frame, text="Position", bg='orange red')
     position_label.grid(row=1, column=2)
-    x_entry = ttk.Entry(position_frame, width=8, justify=tkinter.CENTER)
+    x_entry = ttk.Entry(position_frame, width=8, justify=tk.CENTER)
     x_entry.grid(row=2, column=1)
-    y_entry = ttk.Entry(position_frame, width=8, justify=tkinter.CENTER)
+    y_entry = ttk.Entry(position_frame, width=8, justify=tk.CENTER)
     y_entry.grid(row=2, column=3)
 
     # grid(1,2): character button, map button, start button
-    # TODO: frame + 3 button
+    # 3 column, 1 row used, with space between buttons and perimeter [row 0 & 2, column 0 & 2 & 4 & 6] expandable.
+    start_frame = tk.Frame(root, bg='black')
+    start_frame.grid(row=1, column=2, sticky='nsew')
+    start_frame.grid_rowconfigure([0, 2], weight=1)
+    start_frame.grid_columnconfigure([0, 2, 4, 6], weight=1)
+
+    map_button = ttk.Button(start_frame, text="Map <M>", width=12)
+    map_button.grid(row=1, column=1)
+    map_button['command'] = lambda: print("Map button")
+    root.bind('<m>', lambda event: print("Map key"))
+
+    start_button = ttk.Button(start_frame, text="Start <Enter>", width=12)
+    start_button.grid(row=1, column=3)
+    start_button['command'] = lambda: print("Start button")
+    root.bind('<Return>', lambda event: print("Start key"))
+
+    character_button = ttk.Button(start_frame, text="Character <P>", width=12)
+    character_button.grid(row=1, column=5)
+    character_button['command'] = lambda: print("Start button")
+    root.bind('<p>', lambda event: print("Start key"))
 
     # grid(1,3) TOP right frame that contain the direction label and entry box
     # 1 column, 2 row used, with one free column/row for sticky room
-    direction_frame = ttk.Frame(root, padding=10)
+    direction_frame = tk.Frame(root, bg='dodger blue')
     direction_frame.grid(row=1, column=3, sticky='nsew')
     direction_frame.grid_rowconfigure([0, 3], weight=1)
     direction_frame.grid_columnconfigure([0, 2], weight=1)
 
-    direction_label = ttk.Label(direction_frame, text="Direction")
+    direction_label = tk.Label(direction_frame, text="Direction", bg='dodger blue')
     direction_label.grid(row=1, column=1)
-    direction_entry = ttk.Entry(direction_frame, width=8, justify=tkinter.CENTER)
+    direction_entry = ttk.Entry(direction_frame, width=8, justify=tk.CENTER)
     direction_entry.grid(row=2, column=1)
 
-    # grid(1,2): Text display frame with tkinter text widget, free grid around perimeter.
-    display_frame = ttk.Frame(root, padding=10)
-    display_frame.grid(row=2, column=2, sticky='nsew')
-    display_frame.grid_rowconfigure([0, 2], weight=1)
-    display_frame.grid_columnconfigure([0, 2], weight=1)
+    # grid(2, 2) Canvas display frame with tkinter canvas, free grid around perimeter.
+    canvas_frame = tk.Frame(root, bg='black')
+    canvas_frame.grid(row=2, column=2, sticky='nsew')
+    canvas_frame.grid_rowconfigure([0, 2], weight=1)
+    canvas_frame.grid_columnconfigure([0, 2], weight=1)
 
-    textbox = tkinter.Text(display_frame, width=40, height=10, font=('Comic Sans MS', 24, 'bold'))
+    canvas = tk.Canvas(canvas_frame, width=960, height=400)
+    canvas.grid(row=1, column=1)
+
+    # grid(3,2): Text display frame with tkinter text widget, free grid around perimeter.
+    # 1 character width = 15 pixel with 24 font
+    text_frame = tk.Frame(root, bg='black')
+    text_frame.grid(row=3, column=2, sticky='nsew')
+    text_frame.grid_rowconfigure([0, 2], weight=1)
+    text_frame.grid_columnconfigure([0, 2], weight=1)
+
+    textbox = tk.Text(text_frame, width=64, height=5, font=('Comic Sans MS', 24, 'bold'), background='lightgray')
     textbox.grid(row=1, column=1)
     textbox.tag_configure("center", justify='center')
 
@@ -64,7 +98,7 @@ def main():
 
 
     main_frame = ttk.Frame(root, padding=50)
-    main_frame.grid(row=3, column=2, sticky='nswe')
+    main_frame.grid(row=4, column=2, sticky='nswe')
     main_frame.grid_rowconfigure(1, weight=1)
     main_frame.grid_columnconfigure(1, weight=1)
 
@@ -117,8 +151,6 @@ def main():
     e_button = ttk.Button(main_frame, text="Exit")
     e_button.grid(row=6, column=2)
     e_button['command'] = lambda: exit()
-
-
 
     def text_director(inputs):
         textbox.insert('0.1', inputs, 'center')
