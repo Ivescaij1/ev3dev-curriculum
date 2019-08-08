@@ -8,6 +8,34 @@ def main():
     root = tk.Tk()
     root.title("Game Control")
 
+    main_gui(root)
+    menu_bar(root)
+
+    root.mainloop()
+
+
+def menu_bar(root):
+    root.option_add('*tearOff', False)
+    menubar = tk.Menu(root)
+    root['menu'] = menubar
+
+    main_menu = tk.Menu(menubar)
+    menubar.add_cascade(menu=main_menu, label='Menu')
+
+    main_menu.add_command(label='Save',
+                          command=lambda: print('MenuSave'))
+    main_menu.add_command(label='Load',
+                          command=lambda: print('MenuLoad'))
+    main_menu.add_command(label='Exit',
+                          command=lambda: exit())
+
+    game_menu = tk.Menu(menubar)
+    menubar.add_cascade(menu=game_menu, label='Game')
+    game_menu.add_command(label='Character',
+                          command=lambda: pop_up())
+
+
+def main_gui(root):
     # grid(0, 1-3) & (1-3, 0): Empty frame that holds left and right buttons frame always in same size
     top_bar_left = tk.Frame(root, width=280, height=0)
     top_bar_left.grid(row=0, column=1)
@@ -56,8 +84,8 @@ def main():
 
     character_button = ttk.Button(start_frame, text="Character <P>", width=12)
     character_button.grid(row=1, column=5)
-    character_button['command'] = lambda: print("Start button")
-    root.bind('<p>', lambda event: print("Start key"))
+    character_button['command'] = lambda: pop_up()
+    root.bind('<p>', lambda event: pop_up())
 
     # grid(1,3) TOP right frame that contain the direction label and entry box
     # 1 column, 2 row used, with one free column/row for sticky room
@@ -200,15 +228,81 @@ def main():
     down_button['command'] = lambda: print("Down button")
     root.bind('<j>', lambda event: print("Down key"))
 
-    def text_director(inputs):
-        textbox.insert('1.0', inputs, 'center')
-
-    sys.stdout.write = text_director  # whenever sys.stdout.write is called, redirector is called.
     root.grid_rowconfigure([1, 2, 3], weight=1)
     root.grid_columnconfigure([1, 2, 3], weight=1)
 
-    root.mainloop()
+    def text_director(inputs):
+        textbox.insert('1.0', inputs, 'center')
 
+    sys.stdout.write = text_director
+
+
+def pop_up():
+    """ Pops up a window, with a Label that shows some info. """
+    window = tk.Toplevel()  # Note Toplevel, NOT Tk.
+    window.grid_rowconfigure([0, 4, 6, 8, 10], weight=1)
+    window.grid_columnconfigure([0, 4, 6, 10], weight=1)
+
+    sp_box = tk.Entry(window, width=4, justify=tk.CENTER)
+    sp_box.grid(row=2, column=5)
+    sp_label = tk.Label(window, text='Available skill points')
+    sp_label.grid(row=1, column=5)
+
+    hp_label = tk.Label(window, text='HP')
+    hp_label.grid(row=3, column=1)
+    hp_box = tk.Entry(window, width=4, justify=tk.CENTER)
+    hp_box.grid(row=3, column=2)
+    hp_button = tk.Button(window, text="+hp", height=1, width=4)
+    hp_button.grid(row=3, column=3)
+    hp_button['command'] = lambda: print("button")
+
+    str_label = tk.Label(window, text='Strength')
+    str_label.grid(row=5, column=1)
+    str_box = tk.Entry(window, width=4, justify=tk.CENTER)
+    str_box.grid(row=5, column=2)
+    str_button = tk.Button(window, text="+str", height=1, width=4)
+    str_button.grid(row=5, column=3)
+    str_button['command'] = lambda: print("button")
+
+    vit_label = tk.Label(window, text='Vitality')
+    vit_label.grid(row=7, column=1)
+    vit_box = tk.Entry(window, width=4, justify=tk.CENTER)
+    vit_box.grid(row=7, column=2)
+    vit_button = tk.Button(window, text="+vit", height=1, width=4)
+    vit_button.grid(row=7, column=3)
+    vit_button['command'] = lambda: print("button")
+
+    mp_label = tk.Label(window, text='MP')
+    mp_label.grid(row=3, column=7)
+    mp_box = tk.Entry(window, width=4, justify=tk.CENTER)
+    mp_box.grid(row=3, column=8)
+    mp_button = tk.Button(window, text="+mp", height=1, width=4)
+    mp_button.grid(row=3, column=9)
+    mp_button['command'] = lambda: print("button")
+
+    int_label = tk.Label(window, text='Intelligence')
+    int_label.grid(row=5, column=7)
+    int_box = tk.Entry(window, width=4, justify=tk.CENTER)
+    int_box.grid(row=5, column=8)
+    int_button = tk.Button(window, text="+int", height=1, width=4)
+    int_button.grid(row=5, column=9)
+    int_button['command'] = lambda: print("button")
+
+    agi_label = tk.Label(window, text='Agility')
+    agi_label.grid(row=7, column=7)
+    agi_box = tk.Entry(window, width=4, justify=tk.CENTER)
+    agi_box.grid(row=7, column=8)
+    agi_button = tk.Button(window, text="+agi", height=1, width=4)
+    agi_button.grid(row=7, column=9)
+    agi_button['command'] = lambda: print("button")
+
+    confirm = tk.Button(window, text="Confirm\n<Enter>", height=2, width=8)
+    confirm.grid(row=9, column=4)
+    window.bind('<Return>', lambda event: print('Confirm'))
+
+    window_destroy = tk.Button(window, text="Exit\n<P>", height=2, width=8)
+    window_destroy.grid(row=9, column=6)
+    window.bind('<p>', lambda event: window.destroy())
 
 # ----------------------------------------------------------------------
 # Calls  main  to start the ball rolling.
