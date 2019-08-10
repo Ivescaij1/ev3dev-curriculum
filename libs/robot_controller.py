@@ -22,29 +22,54 @@ class Snatch3r(object):
     
     # TODO: Implement the Snatch3r class as needed when working the sandox exercises
     # (and delete these comments)
-    def drive_inches(self, inches, speed):
-        """ Drive the robert a fixed numbr of inches with constant speed
-        :param inches: inches
-        :param speed: inches/seconds
-        :return: none
+    def drive_inches(self, distance_inches, speed_sp):
+        """ Drive the robert a fixed number of inches with constant speed
+        :param distance_inches: inches
+        :param speed_sp: degree per seconds
+        :return: None
         """
-    # TODO:
+        left_motor = ev3.LargeMotor(ev3.OUTPUT_B)
+        right_motor = ev3.LargeMotor(ev3.OUTPUT_C)
+        assert left_motor.connected
+        assert right_motor.connected
 
-    def turn_degrees(self, degress, speed):
+        if speed_sp != 0 and distance_inches != 0:
+            position_sp = distance_inches * 90
+
+            left_motor.run_to_rel_pos(position_sp=position_sp, speed_sp=speed_sp, stop_action="brake")
+            right_motor.run_to_rel_pos(position_sp=position_sp, speed_sp=speed_sp, stop_action="brake")
+
+            left_motor.wait_while("running")
+            right_motor.wait_while("running")
+
+    def turn_degrees(self, degrees_to_turn, turn_speed_sp):
         """ Turns a set of degrees, positive is left turn
-        :param degress: degrees
-        :param speed: degrees/seconds
-        :return:
+        :param degrees_to_turn: degrees
+        :param turn_speed_sp: degrees/seconds
+        :return: None
         """
-    # TODO
+        left_motor = ev3.LargeMotor(ev3.OUTPUT_B)
+        right_motor = ev3.LargeMotor(ev3.OUTPUT_C)
+        # assert left_motor.connected
+        # assert right_motor.connected
 
-    def arm_up(self):
+        if turn_speed_sp != 0 and degrees_to_turn != 0:
+            position_sp = degrees_to_turn
+            speed_sp = turn_speed_sp
 
+            left_motor.run_to_rel_pos(position_sp=-position_sp, speed_sp=speed_sp, stop_action="brake")
+            right_motor.run_to_rel_pos(position_sp=position_sp, speed_sp=speed_sp, stop_action="brake")
 
-    def arm_down(self):
+            left_motor.wait_while("running")
+            right_motor.wait_while("running")
 
-
-    def main_sensor(self):
-
-
-    def color_sensor(self):
+    # def arm_up(self):
+    #
+    #
+    # def arm_down(self):
+    #
+    #
+    # def main_sensor(self):
+    #
+    #
+    # def color_sensor(self):
