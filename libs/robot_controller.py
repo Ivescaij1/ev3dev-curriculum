@@ -11,7 +11,7 @@
   could be called.  That way it's a generic action that could be used in any task.
 """
 
-
+# TODO: Implement the Snatch3r class as needed when working the sandox exercises
 import ev3dev.ev3 as ev3
 import math
 import time
@@ -19,12 +19,9 @@ import time
 
 class Snatch3r(object):
     """Commands for the Snatch3r robot that might be useful in many different programs."""
-    
-    # TODO: Implement the Snatch3r class as needed when working the sandox exercises
-    # (and delete these comments)
-    # def __init__(self):
-    #     self.x = 0
-    #     self.y = 0
+
+    def __init__(self):
+        self.running = True
 
     def drive_inches(self, distance_inches, speed_sp):
         """ Drive the robert a fixed number of inches with constant speed
