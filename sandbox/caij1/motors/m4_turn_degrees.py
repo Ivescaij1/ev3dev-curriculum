@@ -62,7 +62,7 @@ def main():
     print(" Turn degrees")
     print("--------------------------------------------")
     # ev3.Sound.speak("Turn degrees").wait()
-    robot = robo.Snatch3r
+    robot = robo.Snatch3r()
 
     while True:
         turn_speed = int(input("A speed (0 to 900 dps): "))

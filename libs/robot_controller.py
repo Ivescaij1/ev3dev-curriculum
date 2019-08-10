@@ -22,6 +22,10 @@ class Snatch3r(object):
     
     # TODO: Implement the Snatch3r class as needed when working the sandox exercises
     # (and delete these comments)
+    # def __init__(self):
+    #     self.x = 0
+    #     self.y = 0
+
     def drive_inches(self, distance_inches, speed_sp):
         """ Drive the robert a fixed number of inches with constant speed
         :param distance_inches: inches
