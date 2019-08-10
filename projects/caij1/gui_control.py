@@ -304,6 +304,7 @@ def pop_up():
     window_destroy.grid(row=9, column=6)
     window.bind('<p>', lambda event: window.destroy())
 
+
 # ----------------------------------------------------------------------
 # Calls  main  to start the ball rolling.
 # ----------------------------------------------------------------------
