@@ -50,6 +50,7 @@ def main():
                   # ev3.Leds.ORANGE,  # Too close to another color in my opinion
                   # ev3.Leds.YELLOW,  # Too close to another color in my opinion
                   ev3.Leds.AMBER]
+    color_index = 0
 
     while True:
         # TODO: 3. Implement the left, right, and up buttons as follows:
@@ -92,7 +93,6 @@ def main():
         #   Since you are only allowed to use states, not event callbacks, this last request is a pain, but it's doable
         #     with a while loop that blocks code execution until the down instance variable is False.
         #     Use a time.sleep(0.01) inside the while loop to do nothing but wait for the button to be released.
-        color_index = 0
         if btn.down:
             print('down')
             color_index = (color_index + 1) % len(led_colors)
