@@ -98,11 +98,11 @@ def main():
     btn.on_backspace = lambda state: handle_shutdown(state, dc)
 
     while dc.running:
-        # TODO: 4. Call the .process() method on your channel 1 RemoteControl object, then review and run your code.
+        # DONE: 4. Call the .process() method on your channel 1 RemoteControl object, then review and run your code.
         #   Review the handle functions below to see how they draw to the screen.  They are already finished.
         rc1.process()
 
-        # TODO: 6. Call the .process() method on your channel 2 - 4 RemoteControl objects and demo your code.
+        # DONE: 6. Call the .process() method on your channel 2 - 4 RemoteControl objects and demo your code.
         #   Review the handle functions below to see how they draw to the screen.  They are already finished.
         rc2.process()
         rc3.process()
