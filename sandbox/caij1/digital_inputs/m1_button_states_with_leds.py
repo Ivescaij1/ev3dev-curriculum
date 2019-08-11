@@ -51,7 +51,6 @@ def main():
                   # ev3.Leds.YELLOW,  # Too close to another color in my opinion
                   ev3.Leds.AMBER]
 
-    current_color_index = 0
     while True:
         # TODO: 3. Implement the left, right, and up buttons as follows:
         #    When the up button is being pressed:
@@ -78,10 +77,14 @@ def main():
         if btn.left:
             print('left')
             ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.GREEN)
+            ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.BLACK)
             time.sleep(3)
         if btn.right():
             print('right')
             time.sleep(3)
+            ev3.Leds.set_color(ev3.Leds.LEFT, ev3.Leds.BLACK)
+            ev3.Leds.set_color(ev3.Leds.RIGHT, ev3.Leds.RED)
+
 
         # DONE: 4. Implement the down button to change the color of both LEDs.
         #   The first press to down should make both LEDs GREEN, the next press makes them RED, then AMBER, then off.
