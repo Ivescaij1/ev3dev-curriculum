@@ -24,6 +24,8 @@ class Warrior(object):
         self.x = 10
         self.y = 10
         self.towards = 0
+        self.x_range = 0
+        self.y_range = 0
 
     def obtain_exp(self, exp):
         self.exp = self.exp + exp
@@ -83,35 +85,10 @@ class Warrior(object):
         self.towards = self.towards + degree
 
 
-class Monster(object):
-    def __init__(self, x, y, lv):
-        self.x = x
-        self.y = y
-        self.lv = lv
-
-        random_bonus = random.randint(0, self.lv)
-        self.str = 9 + self.lv + random_bonus
-        self.exp = self.lv + random_bonus
-        self.hp = self.lv * 6 + random_bonus * 3
-
-    def attack(self):
-        damage = self.str
-        print('Monster make', damage, 'points damage to you')
-        return damage
-
-    def get_hurt(self, damage):
-        self.hp = self.hp - damage
-        if self.hp <= 0:
-            return self.exp
-        else:
-            print('Monster still have', self.hp, 'points hp')
-
-
 class VisualTurtle(object):
     def __init__(self, canvas, turtle_warrior):
         self.running = True
         self.turtle = turtle.RawTurtle(canvas, shape='turtle')
-        self.turtle_y = 0
         self.canvas = canvas
         self.warrior = turtle_warrior
         self.x_range = 0
@@ -139,23 +116,62 @@ class VisualTurtle(object):
     def visual_draw_map(self, robot):
         self.turtle.goto(-470, 190)
         self.turtle.pendown()
+
+        start_x = time.clock()
         while robot.left_motor.state == 'running':
             self.turtle.forward(self.warrior.agi)
             self.x_range = self.x_range + 10
             time.sleep(0.99)
+        self.warrior.x_range = (time.clock() - start_x) * self.warrior.agi
         self.turtle.right(90)
+
+        start_y = time.clock()
         while robot.right_motor.state == 'running':
             self.turtle.forward(self.warrior.agi)
             self.y_range = self.y_range + 10
             time.sleep(0.99)
         self.turtle.penup()
+        self.warrior.y_range = (time.clock() - start_y) * self.warrior.agi
 
     def visual_generate_map(self):
-        self.x_range = random.randint(10, 94) * 10
-        self.y_range = random.randint(10, 38) * 10
+        self.x_range = random.randint(47, 94) * 10
+        self.y_range = random.randint(19, 38) * 10
         self.canvas.create_rectangle(-470, -190, -470 + self.x_range, -190 + self.y_range)
 
+        self.warrior.x_range = self.x_range
+        self.warrior.y_range = self.y_range
         self.turtle.goto(-469.9, 189.9)
+
+
+class Monster(object):
+    def __init__(self, warrior, canvas):
+        self.x = random.randint(-470, -470 + warrior.x_range)
+        self.y = random.randint(-190, -190 + warrior.y_range)
+        self.lv = random.randint(0, 5) + warrior.lv
+
+        random_bonus = random.randint(0, 10)
+        self.str = 9 + self.lv + random_bonus
+        self.exp = self.lv + random_bonus
+        self.hp = self.lv * 6 + random_bonus * 3
+
+        canvas.create_oval(self.x + 2 - random_bonus, self.y + 2 - random_bonus,
+                           self.x + 2 + random_bonus, self.y + 2 + random_bonus, fill='black')
+
+    def attack(self):
+        damage = self.str
+        print('Monster make', damage, 'points damage to you')
+        return damage
+
+    def get_hurt(self, damage):
+        self.hp = self.hp - damage
+        if self.hp <= 0:
+            return self.exp
+        else:
+            print('Monster still have', self.hp, 'points hp')
+
+
+
+
 
 
 
