@@ -1,5 +1,9 @@
 
 import random
+import rosegraphics as rg
+import time
+import robot_controller as robo
+import math
 
 
 class Warrior(object):
@@ -17,8 +21,8 @@ class Warrior(object):
         self.mp = self.max_mp
         self.skill_point = 0
 
-        self.x = 0
-        self.y = 0
+        self.x = 10
+        self.y = 10
         self.towards = 0
 
     def obtain_exp(self, exp):
@@ -101,3 +105,67 @@ class Monster(object):
             return self.exp
         else:
             print('Monster still have', self.hp, 'points hp')
+
+
+class VisualTurtle(object):
+    def __init__(self, canvas, turtle_warrior):
+        self.running = True
+        self.x = 0
+        self.y = 0
+        self.canvas = canvas
+        self.warrior = turtle_warrior
+        self.x_range = 0
+        self.y_range = 0
+
+        self.speed = turtle_warrior.agi
+
+    def visual_move(self, distance):
+        while self.warrior.x < self.x_range \
+                and self.warrior.y < self.y_range:
+            if distance > 0:
+                self.turtle.forward(distance)
+            if distance < 0:
+                self.turtle.backward(distance)
+
+    def visual_turn(self, degrees):
+        if degrees > 0:
+            self.turtle.left(degrees)
+        if degrees < 0:
+            self.turtle.right(degrees)
+
+    def visual_draw_map(self, robot):
+        self.turtle.goto(9, 10)
+        self.turtle.goto(10, 10)
+
+
+        while robot.left_motor.state == 'running':
+            self.turtle.forward(self.warrior.agi)
+            self.x_range = self.x_range + 10
+            time.sleep(0.99)
+
+        while robot.right_motor.state == 'running':
+            self.turtle.forward(self.warrior.agi)
+            self.y_range = self.y_range + 10
+            time.sleep(0.99)
+
+    def visual_generate_map(self):
+        self.x_range = random.randint(10, 94) * 10
+        self.y_range = random.randint(10, 38) * 10
+        self.canvas.create_rectangle(10, 10, self.x_range, self.y_range)
+
+        shape(self.x, self.y, 0, self.canvas)
+
+
+
+
+def shape(x, y, deg, canvas):
+    pc_x = x
+    pc_y = y
+    pa_x = x + math.cos(deg - 90) * 1
+    pa_y = y + math.sin(deg - 90) * 1
+    pu_x = x - math.cos(deg - 45) * 1
+    pu_y = y - math.sin(deg - 45) * 1
+    pd_x = x - math.cos(deg - 45) * 1
+    pd_y = y + math.sin(deg - 45) * 1
+
+    canvas.create_polygon(pc_x, pc_y, pu_x, pu_y, pa_x, pa_y, pd_x, pd_y, fill='black', outline='black')
