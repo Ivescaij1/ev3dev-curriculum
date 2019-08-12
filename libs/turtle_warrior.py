@@ -3,7 +3,7 @@ import random
 import rosegraphics as rg
 import time
 import robot_controller as robo
-import math
+import turtle
 
 
 class Warrior(object):
@@ -110,14 +110,17 @@ class Monster(object):
 class VisualTurtle(object):
     def __init__(self, canvas, turtle_warrior):
         self.running = True
-        self.x = 0
-        self.y = 0
+        self.turtle = turtle.RawTurtle(canvas, shape='turtle')
+        self.turtle_y = 0
         self.canvas = canvas
         self.warrior = turtle_warrior
         self.x_range = 0
         self.y_range = 0
 
-        self.speed = turtle_warrior.agi
+        self.turtle.speed(self.warrior.agi/2)
+        self.turtle.pencolor('black')
+        self.turtle.pensize(width=5)
+        self.turtle.penup()
 
     def visual_move(self, distance):
         while self.warrior.x < self.x_range \
@@ -134,38 +137,27 @@ class VisualTurtle(object):
             self.turtle.right(degrees)
 
     def visual_draw_map(self, robot):
-        self.turtle.goto(9, 10)
-        self.turtle.goto(10, 10)
-
-
+        self.turtle.goto(-470, 190)
+        self.turtle.pendown()
         while robot.left_motor.state == 'running':
             self.turtle.forward(self.warrior.agi)
             self.x_range = self.x_range + 10
             time.sleep(0.99)
-
+        self.turtle.right(90)
         while robot.right_motor.state == 'running':
             self.turtle.forward(self.warrior.agi)
             self.y_range = self.y_range + 10
             time.sleep(0.99)
+        self.turtle.penup()
 
     def visual_generate_map(self):
         self.x_range = random.randint(10, 94) * 10
         self.y_range = random.randint(10, 38) * 10
-        self.canvas.create_rectangle(10, 10, self.x_range, self.y_range)
+        self.canvas.create_rectangle(-470, -190, -470 + self.x_range, -190 + self.y_range)
 
-        shape(self.x, self.y, 0, self.canvas)
-
-
+        self.turtle.goto(-469.9, 189.9)
 
 
-def shape(x, y, deg, canvas):
-    pc_x = x
-    pc_y = y
-    pa_x = x + math.cos(deg - 90) * 1
-    pa_y = y + math.sin(deg - 90) * 1
-    pu_x = x - math.cos(deg - 45) * 1
-    pu_y = y - math.sin(deg - 45) * 1
-    pd_x = x - math.cos(deg - 45) * 1
-    pd_y = y + math.sin(deg - 45) * 1
 
-    canvas.create_polygon(pc_x, pc_y, pu_x, pu_y, pa_x, pa_y, pd_x, pd_y, fill='black', outline='black')
+
+
