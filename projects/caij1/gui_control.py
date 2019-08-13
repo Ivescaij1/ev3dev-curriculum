@@ -294,6 +294,8 @@ def menu_bar(root, dc):
         dc.save.x_range = dc.warrior.x_range
         dc.save.y_range = dc.warrior.y_range
 
+        dc.save.state = True
+
     def load():
         print('MenuLoad')
         if dc.save.state:
@@ -315,10 +317,13 @@ def menu_bar(root, dc):
             dc.warrior.towards = dc.save.towards
             dc.warrior.x_range = dc.save.x_range
             dc.warrior.y_range = dc.save.y_range
+        else:
+            print('No Record Found')
 
 
 def pop_up():
     """ Pops up a window, with a Label that shows some info. """
+    # TODO:
     window = tk.Toplevel()
     window.grid_rowconfigure([0, 4, 6, 8, 10], weight=1)
     window.grid_columnconfigure([0, 4, 6, 10], weight=1)
