@@ -19,7 +19,7 @@ def main():
 
     p3 = w.create_rectangle(50, 50, 150, 150, fill='blue')
 
-    b = Button(root, text='删除全部', command=(lambda x=p1: w.delete(x)))
+    b = Button(root, text='删除全部', command=(lambda x=ALL: w.delete(x)))
     b.pack()
 
     mainloop()

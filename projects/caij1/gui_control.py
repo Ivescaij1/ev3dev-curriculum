@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import sys
 import turtle_warrior as tw
+import robot_controller as robo
+import ev3dev.ev3 as ev3
 
 
 class DataContainer(object):
@@ -10,6 +12,7 @@ class DataContainer(object):
         self.warrior = None
         self.turtle = None
         self.Monster = []
+        self.robot = None
 
 
 def main():
@@ -18,6 +21,7 @@ def main():
     root.title("Game Control")
 
     dc = DataContainer()
+    dc.robot = robo.Snatch3r()
     main_gui(root, dc)
     menu_bar(root)
 
@@ -84,13 +88,13 @@ def main_gui(root, dc):
 
     map_button = ttk.Button(start_frame, text="Map <M>", width=12)
     map_button.grid(row=1, column=1)
-    map_button['command'] = lambda: print("Map")
+    map_button['command'] = lambda: handle_map_button(dc, dc.robot)
     root.bind('<m>', lambda event: print("Map"))
 
     start_button = ttk.Button(start_frame, text="Start <Enter>", width=12)
     start_button.grid(row=1, column=3)
     start_button['command'] = lambda: handle_start_button(canvas, dc)
-    root.bind('<Return>', lambda event: print("Start key"))
+    root.bind('<Return>', lambda event: handle_start_button(canvas, dc))
 
     character_button = ttk.Button(start_frame, text="Character <P>", width=12)
     character_button.grid(row=1, column=5)
@@ -238,9 +242,6 @@ def main_gui(root, dc):
     canvas = tk.Canvas(canvas_frame, width=960, height=400)
     canvas.grid(row=1, column=1)
 
-    # canvas.bind('Start', lambda event: display_start(canvas, dc))
-    # canvas.bind('<Move>', lambda event: display_move(gui_turtle))
-
     # root configuation below
     def text_director(inputs):
         textbox.insert('1.0', inputs, 'center')
@@ -252,9 +253,21 @@ def main_gui(root, dc):
     # button functions below this point
     # TODO
     def handle_start_button(window, data):
+        print("Start key")
         if data.turtle is None:
             data.warrior = tw.Warrior()
             data.turtle = tw.VisualTurtle(window, data.warrior)
+        else:
+            for _ in range(5):
+                data.Monster = data.Monster + [tw.Monster(data.warrior, window)]
+
+    def handle_map_button(data, robot):
+        if ev3.LargeMotor(ev3.OUTPUT_B).connected:
+            data.turtle.draw_map(robot)
+        else:
+            data.turtle.generate_map()
+
+
 
     # canvas bind functions below this point (if needed)
     # TODO

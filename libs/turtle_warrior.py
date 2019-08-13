@@ -93,6 +93,7 @@ class VisualTurtle(object):
         self.warrior = turtle_warrior
         self.x_range = 0
         self.y_range = 0
+        self.map = None
 
         self.turtle.speed(self.warrior.agi/2)
         self.turtle.pencolor('black')
@@ -136,7 +137,11 @@ class VisualTurtle(object):
     def generate_map(self):
         self.x_range = random.randint(47, 94) * 10
         self.y_range = random.randint(19, 38) * 10
-        self.canvas.create_rectangle(-470, -190, -470 + self.x_range, -190 + self.y_range)
+        if self.map is None:
+            self.map = self.canvas.create_rectangle(-470, -190, -470 + self.x_range, -190 + self.y_range)
+        else:
+            self.canvas.delete(self.map)
+            self.map = self.canvas.create_rectangle(-470, -190, -470 + self.x_range, -190 + self.y_range)
 
         self.warrior.x_range = self.x_range
         self.warrior.y_range = self.y_range
