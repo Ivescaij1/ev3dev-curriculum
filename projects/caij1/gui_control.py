@@ -1,6 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
 import sys
+import turtle_warrior as tw
+
+
+class DataContainer(object):
+    def __init__(self):
+        self.running = False
+        self.warrior = None
+        self.turtle = None
+        self.Monster = []
 
 
 def main():
@@ -8,7 +17,8 @@ def main():
     root = tk.Tk()
     root.title("Game Control")
 
-    main_gui(root)
+    dc = DataContainer()
+    main_gui(root, dc)
     menu_bar(root)
 
     root.mainloop()
@@ -35,7 +45,7 @@ def menu_bar(root):
                           command=lambda: pop_up())
 
 
-def main_gui(root):
+def main_gui(root, dc):
     # grid(0, 1-3) & (1-3, 0): Empty frame that holds left and right buttons frame always in same size
     top_bar_left = tk.Frame(root, width=280, height=0)
     top_bar_left.grid(row=0, column=1)
@@ -74,12 +84,12 @@ def main_gui(root):
 
     map_button = ttk.Button(start_frame, text="Map <M>", width=12)
     map_button.grid(row=1, column=1)
-    map_button['command'] = lambda: print("Map button")
-    root.bind('<m>', lambda event: print("Map key"))
+    map_button['command'] = lambda: print("Map")
+    root.bind('<m>', lambda event: print("Map"))
 
     start_button = ttk.Button(start_frame, text="Start <Enter>", width=12)
     start_button.grid(row=1, column=3)
-    start_button['command'] = lambda: print("Start button")
+    start_button['command'] = lambda: handle_start_button(canvas, dc)
     root.bind('<Return>', lambda event: print("Start key"))
 
     character_button = ttk.Button(start_frame, text="Character <P>", width=12)
@@ -98,26 +108,6 @@ def main_gui(root):
     direction_label.grid(row=2, column=1)
     direction_entry = ttk.Entry(direction_frame, width=8, justify=tk.CENTER)
     direction_entry.grid(row=1, column=1)
-
-    # grid(2, 2) Canvas display frame with tkinter canvas, free grid around perimeter.
-    canvas_frame = tk.Frame(root, bg='black')
-    canvas_frame.grid(row=2, column=2, sticky='nsew')
-    canvas_frame.grid_rowconfigure([0, 2], weight=1)
-    canvas_frame.grid_columnconfigure([0, 2], weight=1)
-
-    canvas = tk.Canvas(canvas_frame, width=960, height=400)
-    canvas.grid(row=1, column=1)
-
-    # grid(3,2): Text display frame with tkinter text widget, free grid around perimeter.
-    # 1 character width = 15 pixel with 24 font
-    text_frame = tk.Frame(root, bg='black')
-    text_frame.grid(row=3, column=2, sticky='nsew')
-    text_frame.grid_rowconfigure([0, 2], weight=1)
-    text_frame.grid_columnconfigure([0, 2], weight=1)
-
-    textbox = tk.Text(text_frame, width=64, height=5, font=('Comic Sans MS', 24, 'bold'), background='lightgray')
-    textbox.grid(row=1, column=1)
-    textbox.tag_configure("center", justify='center')
 
     # grid(2, 1) left move control, free grid around perimeter and between 'move' and direction button
     # * have row0 reserved even if not expandable
@@ -228,13 +218,47 @@ def main_gui(root):
     down_button['command'] = lambda: print("Down button")
     root.bind('<j>', lambda event: print("Down key"))
 
-    root.grid_rowconfigure([1, 2, 3], weight=1)
-    root.grid_columnconfigure([1, 2, 3], weight=1)
+    # grid(3,2): Text display frame with tkinter text widget, free grid around perimeter.
+    # 1 character width = 15 pixel with 24 font
+    text_frame = tk.Frame(root, bg='black')
+    text_frame.grid(row=3, column=2, sticky='nsew')
+    text_frame.grid_rowconfigure([0, 2], weight=1)
+    text_frame.grid_columnconfigure([0, 2], weight=1)
 
+    textbox = tk.Text(text_frame, width=64, height=5, font=('Comic Sans MS', 24, 'bold'), background='lightgray')
+    textbox.grid(row=1, column=1)
+    textbox.tag_configure("center", justify='center')
+
+    # grid(2, 2) Canvas display frame with tkinter canvas, free grid around perimeter.
+    canvas_frame = tk.Frame(root, bg='black')
+    canvas_frame.grid(row=2, column=2, sticky='nsew')
+    canvas_frame.grid_rowconfigure([0, 2], weight=1)
+    canvas_frame.grid_columnconfigure([0, 2], weight=1)
+
+    canvas = tk.Canvas(canvas_frame, width=960, height=400)
+    canvas.grid(row=1, column=1)
+
+    # canvas.bind('Start', lambda event: display_start(canvas, dc))
+    # canvas.bind('<Move>', lambda event: display_move(gui_turtle))
+
+    # root configuation below
     def text_director(inputs):
         textbox.insert('1.0', inputs, 'center')
 
+    root.grid_rowconfigure([1, 2, 3], weight=1)
+    root.grid_columnconfigure([1, 2, 3], weight=1)
     sys.stdout.write = text_director
+
+    # button functions below this point
+    # TODO
+    def handle_start_button(window, data):
+        if data.turtle is None:
+            data.warrior = tw.Warrior()
+            data.turtle = tw.VisualTurtle(window, data.warrior)
+
+    # canvas bind functions below this point (if needed)
+    # TODO
+
 
 
 def pop_up():

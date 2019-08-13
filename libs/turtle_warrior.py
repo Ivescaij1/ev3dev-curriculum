@@ -99,7 +99,7 @@ class VisualTurtle(object):
         self.turtle.pensize(width=5)
         self.turtle.penup()
 
-    def visual_move(self, distance):
+    def move(self, distance):
         while self.warrior.x < self.x_range \
                 and self.warrior.y < self.y_range:
             if distance > 0:
@@ -107,13 +107,13 @@ class VisualTurtle(object):
             if distance < 0:
                 self.turtle.backward(distance)
 
-    def visual_turn(self, degrees):
+    def turn(self, degrees):
         if degrees > 0:
             self.turtle.left(degrees)
         if degrees < 0:
             self.turtle.right(degrees)
 
-    def visual_draw_map(self, robot):
+    def draw_map(self, robot):
         self.turtle.goto(-470, 190)
         self.turtle.pendown()
 
@@ -133,7 +133,7 @@ class VisualTurtle(object):
         self.turtle.penup()
         self.warrior.y_range = (time.clock() - start_y) * self.warrior.agi
 
-    def visual_generate_map(self):
+    def generate_map(self):
         self.x_range = random.randint(47, 94) * 10
         self.y_range = random.randint(19, 38) * 10
         self.canvas.create_rectangle(-470, -190, -470 + self.x_range, -190 + self.y_range)
@@ -168,6 +168,14 @@ class Monster(object):
             return self.exp
         else:
             print('Monster still have', self.hp, 'points hp')
+
+
+class MonsterInGame(object):
+    def __init__(self, warrior, monster):
+        self.warrior = warrior
+        self.monster = monster
+
+
 
 
 

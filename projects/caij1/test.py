@@ -1,21 +1,29 @@
-import turtle_warrior as tw
-import rosegraphics as rg
-import robot_controller as robo
-import tkinter as tk
-import math
+
+from tkinter import *
 
 
-canvas = tk.Canvas(width=960, height=400)
-canvas.pack()
+def main():
+    root = Tk()
 
-warrior = tw.Warrior()
-warrior.lv = 100
+    w = Canvas(
+        root,
+        width=200,
+        height=200,
+        background="white"
+    )
+    w.pack()
 
-tt = tw.VisualTurtle(canvas, warrior)
+    p1 = w.create_line(0, 100, 200, 100, fill='yellow')
 
-tt.visual_generate_map()
+    p2 = w.create_line(100, 0, 100, 200, fill='red', dash=(4, 4))
 
-for _ in range(10):
-    tw.Monster(warrior, canvas)
+    p3 = w.create_rectangle(50, 50, 150, 150, fill='blue')
 
-canvas.wait_window()
+    b = Button(root, text='删除全部', command=(lambda x=p1: w.delete(x)))
+    b.pack()
+
+    mainloop()
+
+
+if __name__ == '__main__':
+    main()
