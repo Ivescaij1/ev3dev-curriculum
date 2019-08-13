@@ -13,6 +13,8 @@ class DataContainer(object):
         self.turtle = None
         self.Monster = []
         self.robot = None
+        self.save = tw.Warrior()
+        self.save.state = False
 
 
 def main():
@@ -23,30 +25,9 @@ def main():
     dc = DataContainer()
     dc.robot = robo.Snatch3r()
     main_gui(root, dc)
-    menu_bar(root)
+    menu_bar(root, dc)
 
     root.mainloop()
-
-
-def menu_bar(root):
-    root.option_add('*tearOff', False)
-    menubar = tk.Menu(root)
-    root['menu'] = menubar
-
-    main_menu = tk.Menu(menubar)
-    menubar.add_cascade(menu=main_menu, label='Menu')
-
-    main_menu.add_command(label='Save',
-                          command=lambda: print('MenuSave'))
-    main_menu.add_command(label='Load',
-                          command=lambda: print('MenuLoad'))
-    main_menu.add_command(label='Exit',
-                          command=lambda: exit())
-
-    game_menu = tk.Menu(menubar)
-    menubar.add_cascade(menu=game_menu, label='Game')
-    game_menu.add_command(label='Character',
-                          command=lambda: pop_up())
 
 
 def main_gui(root, dc):
@@ -253,7 +234,7 @@ def main_gui(root, dc):
     # button functions below this point
     # TODO
     def handle_start_button(window, data):
-        print("Start key")
+        print("Start")
         if data.turtle is None:
             data.warrior = tw.Warrior()
             data.turtle = tw.VisualTurtle(window, data.warrior)
@@ -262,21 +243,83 @@ def main_gui(root, dc):
                 data.Monster = data.Monster + [tw.Monster(data.warrior, window)]
 
     def handle_map_button(data, robot):
+        print("Map")
         if ev3.LargeMotor(ev3.OUTPUT_B).connected:
             data.turtle.draw_map(robot)
         else:
             data.turtle.generate_map()
 
-
-
     # canvas bind functions below this point (if needed)
     # TODO
 
 
+def menu_bar(root, dc):
+    root.option_add('*tearOff', False)
+    menubar = tk.Menu(root)
+    root['menu'] = menubar
+
+    main_menu = tk.Menu(menubar)
+    menubar.add_cascade(menu=main_menu, label='Menu')
+
+    main_menu.add_command(label='Save',
+                          command=lambda: save())
+    main_menu.add_command(label='Load',
+                          command=lambda: load())
+    main_menu.add_command(label='Exit',
+                          command=lambda: exit())
+
+    game_menu = tk.Menu(menubar)
+    menubar.add_cascade(menu=game_menu, label='Game')
+    game_menu.add_command(label='Character',
+                          command=lambda: pop_up())
+
+    def save():
+        print('MenuSave')
+        dc.save.lv = dc.warrior.lv
+        dc.save.exp = dc.warrior.exp
+        dc.save.str = dc.warrior.exp
+        dc.save.vit = dc.warrior.vit
+        dc.save.agi = dc.warrior.agi
+        dc.save.int = dc.warrior.int
+        dc.save.max_hp = dc.warrior.max_hp
+        dc.save.max_mp = dc.warrior.max_mp
+
+        dc.save.hp = dc.warrior.hp
+        dc.save.mp = dc.warrior.mp
+        dc.save.skill_point = dc.warrior.skill_point
+
+        dc.save.x = dc.warrior.x
+        dc.save.y = dc.warrior.y
+        dc.save.towards = dc.warrior.towards
+        dc.save.x_range = dc.warrior.x_range
+        dc.save.y_range = dc.warrior.y_range
+
+    def load():
+        print('MenuLoad')
+        if dc.save.state:
+            dc.warrior.lv = dc.save.lv
+            dc.warrior.exp = dc.save.exp
+            dc.warrior.str = dc.save.str
+            dc.warrior.vit = dc.save.vit
+            dc.warrior.agi = dc.save.agi
+            dc.warrior.int = dc.save.int
+            dc.warrior.max_hp = dc.save.max_hp
+            dc.warrior.max_mp = dc.save.max_mp
+
+            dc.warrior.hp = dc.save.hp
+            dc.warrior.mp = dc.save.mp
+            dc.warrior.skill_point = dc.save.skill_point
+
+            dc.warrior.x = dc.save.x
+            dc.warrior.y = dc.save.y
+            dc.warrior.towards = dc.save.towards
+            dc.warrior.x_range = dc.save.x_range
+            dc.warrior.y_range = dc.save.y_range
+
 
 def pop_up():
     """ Pops up a window, with a Label that shows some info. """
-    window = tk.Toplevel()  # Note Toplevel, NOT Tk.
+    window = tk.Toplevel()
     window.grid_rowconfigure([0, 4, 6, 8, 10], weight=1)
     window.grid_columnconfigure([0, 4, 6, 10], weight=1)
 
@@ -339,6 +382,7 @@ def pop_up():
 
     window_destroy = tk.Button(window, text="Exit\n<P>", height=2, width=8)
     window_destroy.grid(row=9, column=6)
+    window_destroy['command'] = lambda: window.destroy()
     window.bind('<p>', lambda event: window.destroy())
 
 
