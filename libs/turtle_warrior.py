@@ -4,6 +4,7 @@ import rosegraphics as rg
 import time
 import robot_controller as robo
 import turtle
+from multiprocessing import Process
 
 
 class Warrior(object):
@@ -101,18 +102,23 @@ class VisualTurtle(object):
         self.turtle.penup()
 
     def move(self, distance):
-        while self.warrior.x < self.x_range \
+        if self.warrior.x < self.x_range \
                 and self.warrior.y < self.y_range:
             if distance > 0:
                 self.turtle.forward(distance)
             if distance < 0:
-                self.turtle.backward(distance)
+                self.turtle.backward(-distance)
+
+    def move_to(self, x, y):
+        if self.warrior.x < self.x_range \
+                and self.warrior.y < self.y_range:
+            self.turtle.goto(-470 + x, 190 - y)
 
     def turn(self, degrees):
         if degrees > 0:
             self.turtle.left(degrees)
         if degrees < 0:
-            self.turtle.right(degrees)
+            self.turtle.right(-degrees)
 
     def draw_map(self, robot):
         self.turtle.goto(-470, 190)
@@ -145,7 +151,9 @@ class VisualTurtle(object):
 
         self.warrior.x_range = self.x_range
         self.warrior.y_range = self.y_range
-        self.turtle.goto(-469.9, 189.9)
+        self.turtle.goto(-469, 189)
+        self.warrior.x = 1
+        self.warrior.y = 1
 
 
 class Monster(object):
@@ -154,13 +162,16 @@ class Monster(object):
         self.y = random.randint(-190, -190 + warrior.y_range)
         self.lv = random.randint(0, 5) + warrior.lv
 
-        random_bonus = random.randint(0, 10)
-        self.str = 9 + self.lv + random_bonus
-        self.exp = self.lv + random_bonus
-        self.hp = self.lv * 6 + random_bonus * 3
+        self.random_bonus = random.randint(0, 10)
+        self.str = 9 + self.lv + self.random_bonus
+        self.exp = self.lv + self.random_bonus
+        self.hp = self.lv * 6 + self.random_bonus * 3
 
-        canvas.create_oval(self.x + 2 - random_bonus, self.y + 2 - random_bonus,
-                           self.x + 2 + random_bonus, self.y + 2 + random_bonus, fill='black')
+        self.canvas = canvas
+
+    def draw(self):
+        self.canvas.create_oval(self.x + 3 - self.random_bonus, self.y + 3 - self.random_bonus,
+                                self.x + 3 + self.random_bonus, self.y + 3 + self.random_bonus, fill='black')
 
     def attack(self):
         damage = self.str
@@ -175,13 +186,17 @@ class Monster(object):
             print('Monster still have', self.hp, 'points hp')
 
 
-class MonsterInGame(object):
-    def __init__(self, warrior, monster):
-        self.warrior = warrior
+class MonsterAttack(Process):
+    def __init__(self, monster, warrior):
+        super(MonsterAttack, self).__init__()
         self.monster = monster
+        self.warrior = warrior
 
-
-
+    def run(self):
+        while True:
+            damage = self.monster.attack()
+            self.warrior.get_hurt(damage)
+            time.sleep(1)
 
 
 

@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 import sys
+import math
+from multiprocessing import Process
 import turtle_warrior as tw
 import robot_controller as robo
 import ev3dev.ev3 as ev3
@@ -11,10 +13,34 @@ class DataContainer(object):
         self.running = False
         self.warrior = None
         self.turtle = None
-        self.Monster = []
         self.robot = None
+
         self.save = tw.Warrior()
         self.save.state = False
+
+        self.monster = []
+        self.monster_attacks = []
+
+
+class EntryBoxes(object):
+    def __init__(self):
+        self.x = None
+        self.y = None
+        self.direction = None
+        self.hp = None
+        self.mp = None
+
+    def refresh(self, warrior_in_data):
+        self.x.delete(0, 'end')
+        self.y.delete(0, 'end')
+        self.direction.delete(0, 'end')
+        self.hp.delete(0, 'end')
+        self.mp.delete(0, 'end')
+        self.x.insert(0, str(warrior_in_data.x))
+        self.y.insert(0, str(warrior_in_data.y))
+        self.direction.insert(0, str(warrior_in_data.towards))
+        self.hp.insert(0, str(warrior_in_data.hp))
+        self.mp.insert(0, str(warrior_in_data.mp))
 
 
 def main():
@@ -23,14 +49,15 @@ def main():
     root.title("Game Control")
 
     dc = DataContainer()
+    eb = EntryBoxes()
     dc.robot = robo.Snatch3r()
-    main_gui(root, dc)
+    main_gui(root, dc, eb)
     menu_bar(root, dc)
 
     root.mainloop()
 
 
-def main_gui(root, dc):
+def main_gui(root, dc, eb):
     # grid(0, 1-3) & (1-3, 0): Empty frame that holds left and right buttons frame always in same size
     top_bar_left = tk.Frame(root, width=280, height=0)
     top_bar_left.grid(row=0, column=1)
@@ -57,8 +84,10 @@ def main_gui(root, dc):
     position_label.grid(row=2, column=2)
     x_entry = ttk.Entry(position_frame, width=8, justify=tk.CENTER)
     x_entry.grid(row=1, column=1)
+    eb.x = x_entry
     y_entry = ttk.Entry(position_frame, width=8, justify=tk.CENTER)
     y_entry.grid(row=1, column=3)
+    eb.y = y_entry
 
     # grid(1,2): character button, map button, start button
     # 3 column, 1 row used, with space between buttons and perimeter [row 0 & 2, column 0 & 2 & 4 & 6] expandable.
@@ -70,7 +99,7 @@ def main_gui(root, dc):
     map_button = ttk.Button(start_frame, text="Map <M>", width=12)
     map_button.grid(row=1, column=1)
     map_button['command'] = lambda: handle_map_button(dc, dc.robot)
-    root.bind('<m>', lambda event: print("Map"))
+    root.bind('<m>', lambda event: handle_map_button(dc, dc.robot))
 
     start_button = ttk.Button(start_frame, text="Start <Enter>", width=12)
     start_button.grid(row=1, column=3)
@@ -93,6 +122,7 @@ def main_gui(root, dc):
     direction_label.grid(row=2, column=1)
     direction_entry = ttk.Entry(direction_frame, width=8, justify=tk.CENTER)
     direction_entry.grid(row=1, column=1)
+    eb.direction = direction_entry
 
     # grid(2, 1) left move control, free grid around perimeter and between 'move' and direction button
     # * have row0 reserved even if not expandable
@@ -103,32 +133,32 @@ def main_gui(root, dc):
 
     move_button = tk.Button(move_frame, text="Move", height=2, width=8)
     move_button.grid(row=1, column=2)
-    move_button['command'] = lambda: print("Move button")
+    move_button['command'] = lambda: handle_move_button(dc, eb)
 
     w_button = tk.Button(move_frame, text="W", height=4, width=8)
     w_button.grid(row=3, column=2)
-    w_button['command'] = lambda: print("Forward button")
-    root.bind('<w>', lambda event: print("Forward key"))
+    w_button['command'] = lambda: handle_forward_button(dc)
+    root.bind('<w>', lambda event: handle_forward_button(dc))
 
     a_button = tk.Button(move_frame, text="A", height=4, width=8)
     a_button.grid(row=4, column=1)
-    a_button['command'] = lambda: print("Left button")
-    root.bind('<a>', lambda event: print("Left key"))
+    a_button['command'] = lambda: handle_left_button(dc)
+    root.bind('<a>', lambda event: handle_left_button(dc))
 
     stop_button = tk.Button(move_frame, text="Stop", height=4, width=8)
     stop_button.grid(row=4, column=2)
-    stop_button['command'] = lambda: print("Stop button")
-    root.bind('<space>', lambda event: print("Stop key"))
+    stop_button['command'] = lambda: handle_stop_button(dc)
+    root.bind('<space>', lambda event: handle_stop_button(dc))
 
     d_button = tk.Button(move_frame, text="D", height=4, width=8)
     d_button.grid(row=4, column=3)
-    d_button['command'] = lambda: print("Right button")
-    root.bind('<d>', lambda event: print("Right key"))
+    d_button['command'] = lambda: handle_right_button(dc)
+    root.bind('<d>', lambda event: handle_right_button(dc))
 
     s_button = tk.Button(move_frame, text="S", height=4, width=8)
     s_button.grid(row=5, column=2)
-    s_button['command'] = lambda: print("Back button")
-    root.bind('<s>', lambda event: print("Back key"))
+    s_button['command'] = lambda: handle_backward_button(dc)
+    root.bind('<s>', lambda event: handle_backward_button(dc))
 
     # grid(2, 3) Right action control
 
@@ -139,22 +169,22 @@ def main_gui(root, dc):
 
     turn_button = tk.Button(action_frame, text="Turn", height=2, width=8)
     turn_button.grid(row=1, column=2)
-    turn_button['command'] = lambda: print("Turn button")
+    turn_button['command'] = lambda: handle_turn_button(dc, eb)
 
     att_button = tk.Button(action_frame, text="Attack \n<J>", height=4, width=8)
     att_button.grid(row=3, column=2)
-    att_button['command'] = lambda: print("Att button")
+    att_button['command'] = lambda: print("Att button") # TODO
     root.bind('<j>', lambda event: print("Att key"))
 
     skill_button = tk.Button(action_frame, text="Fire Ball \n<K>", height=4, width=8)
     skill_button.grid(row=5, column=2)
     skill_button['command'] = lambda: print("d Att button")
-    root.bind('<k>', lambda event: print("d Att key"))
+    root.bind('<k>', lambda event: print("d Att key")) # TODO
 
     rest_button = tk.Button(action_frame, text="Rest \n<L>", height=4, width=8)
     rest_button.grid(row=7, column=2)
     rest_button['command'] = lambda: print("rest button")
-    root.bind('<l>', lambda event: print("rest key"))
+    root.bind('<l>', lambda event: print("rest key")) # TODO
 
     # grid (3, 1) hp/mp & exit display frame
     exit_frame = tk.Frame(root, bg='orange red')
@@ -164,13 +194,15 @@ def main_gui(root, dc):
 
     hp_label = tk.Label(exit_frame, text="HP", bg='orange red')
     hp_label.grid(row=1, column=2)
-    hp = ttk.Entry(exit_frame, width=8, justify=tk.CENTER)
-    hp.grid(row=1, column=3)
+    hp_box = ttk.Entry(exit_frame, width=8, justify=tk.CENTER)
+    hp_box.grid(row=1, column=3)
+    eb.hp = hp_box
 
     mp_label = tk.Label(exit_frame, text="MP", bg='orange red')
     mp_label.grid(row=3, column=2)
-    mp = ttk.Entry(exit_frame, width=8, justify=tk.CENTER)
-    mp.grid(row=3, column=3)
+    mp_box = ttk.Entry(exit_frame, width=8, justify=tk.CENTER)
+    mp_box.grid(row=3, column=3)
+    eb.mp = mp_box
 
     exit_button = ttk.Button(exit_frame, text="Exit <X>")
     exit_button.grid(row=5, column=0)
@@ -185,13 +217,13 @@ def main_gui(root, dc):
 
     left_button = tk.Button(turn_frame, text="Left <Q>", height=4, width=8)
     left_button.grid(row=2, column=1)
-    left_button['command'] = lambda: print("left button")
-    root.bind('<q>', lambda event: print("left key"))
+    left_button['command'] = lambda: handle_left_turn(dc)
+    root.bind('<q>', lambda event: handle_left_turn(dc))
 
     right_button = tk.Button(turn_frame, text="Right <E>", height=4, width=8)
     right_button.grid(row=2, column=3)
-    right_button['command'] = lambda: print("right button")
-    root.bind('<e>', lambda event: print("right key"))
+    right_button['command'] = lambda: handle_right_turn(dc)
+    root.bind('<e>', lambda event: handle_right_turn(dc))
 
     up_button = tk.Button(turn_frame, text="Up", height=4, width=8)
     up_button.grid(row=1, column=2)
@@ -232,25 +264,112 @@ def main_gui(root, dc):
     sys.stdout.write = text_director
 
     # button functions below this point
-    # TODO
     def handle_start_button(window, data):
         print("Start")
-        if data.turtle is None:
+        if not data.running:
             data.warrior = tw.Warrior()
             data.turtle = tw.VisualTurtle(window, data.warrior)
+            data.running = True
         else:
-            for _ in range(5):
-                data.Monster = data.Monster + [tw.Monster(data.warrior, window)]
+            if not ev3.LargeMotor(ev3.OUTPUT_B).connected:
+                if len(dc.monster) < 50:
+                    for _ in range(5):
+                        new_monster = tw.Monster(data.warrior, window)
+                        new_monster.draw()
+                        data.monster.append(new_monster)
+                else:
+                    print('You have TOO MANY monsters')
+
+            #else: TODO
+                # if:
+                #     new_monster = tw.Monster(data.warrior, window)
+                #     new_monster.x = data.warrior.x + 10 * math.cos(data.warrior.toward)
+                #     new_monster.y = data.warrior.y + 10 * math.sin(data.warrior.toward)
+                #     new_monster.draw()
+                #     data.Monster = data.Monster + [new_monster]
+            print('Notice: Bigger == Stronger')
 
     def handle_map_button(data, robot):
         print("Map")
-        if ev3.LargeMotor(ev3.OUTPUT_B).connected:
-            data.turtle.draw_map(robot)
+        if data.running:
+            if ev3.LargeMotor(ev3.OUTPUT_B).connected:
+                data.turtle.draw_map(robot)
+            else:
+                data.turtle.generate_map()
         else:
-            data.turtle.generate_map()
+            print('Press Start to start,\n'
+                  'Then press map to generate map, \n'
+                  'Press Start again to generate monsters')
 
-    # canvas bind functions below this point (if needed)
-    # TODO
+    def handle_move_button(data, entry_boxes):
+        print("Button Move")
+        x = int(entry_boxes.x.get())
+        y = int(entry_boxes.y.get())
+        data.warrior.x = x
+        data.warrior.y = y
+        data.turtle.move_to(x, y)
+
+    def handle_forward_button(data):
+        print("Forward button")
+        data.turtle.move(data.warrior.agi)
+        data.warrior.x = data.warrior.x + data.warrior.agi * math.cos(data.warrior.towards)
+        data.warrior.y = data.warrior.y - data.warrior.agi * math.sin(data.warrior.towards)
+        eb.refresh(data.warrior)
+        # check_distance(data)
+
+    def handle_backward_button(data):
+        print("Back button")
+        data.turtle.move(-data.warrior.agi)
+        data.warrior.x = data.warrior.x - data.warrior.agi * math.cos(data.warrior.towards)
+        data.warrior.y = data.warrior.y + data.warrior.agi * math.sin(data.warrior.towards)
+        eb.refresh(data.warrior)
+        # check_distance(data)
+
+    def handle_left_button(data):
+        print("Left button")
+        data.warrior.x = data.warrior.x - data.warrior.agi * math.sin(data.warrior.towards)
+        data.warrior.y = data.warrior.y - data.warrior.agi * math.cos(data.warrior.towards)
+        data.turtle.move_to(data.warrior.x, data.warrior.y)
+        eb.refresh(data.warrior)
+        # check_distance(data)
+
+    def handle_right_button(data):
+        print("Right button")
+        data.warrior.x = data.warrior.x + data.warrior.agi * math.sin(data.warrior.towards)
+        data.warrior.y = data.warrior.y + data.warrior.agi * math.cos(data.warrior.towards)
+        data.turtle.move_to(data.warrior.x, data.warrior.y)
+        eb.refresh(data.warrior)
+        # check_distance(data)
+
+    def handle_stop_button(data):
+        print('Space')
+        data.turtle.move_to(data.warrior.x, data.warrior.y)
+        eb.refresh(data.warrior)
+        check_distance(data)
+
+    def handle_turn_button(data, entry_boxes):
+        print("Turn button")
+        degree = int(entry_boxes.direction.get())
+        data.warrior.towards = degree % 360
+        data.turtle.turn(degree)
+
+    def handle_left_turn(data):
+        print('Turn left')
+        data.turtle.turn(10)
+        data.warrior.towards = (data.warrior.towards + 10) % 360
+        eb.refresh(data.warrior)
+
+    def handle_right_turn(data):
+        print('Turn left')
+        data.turtle.turn(-10)
+        data.warrior.towards = (data.warrior.towards - 10) % 360
+        eb.refresh(data.warrior)
+
+    def handle_attack_button(data):
+
+    def handle_d_attack_button(data):
+
+    def handle_rest_button(data):
 
 
 def menu_bar(root, dc):
@@ -391,7 +510,20 @@ def pop_up():
     window.bind('<p>', lambda event: window.destroy())
 
 
+def check_distance(data_container):
+    for i in range(len(data_container.monster_attacks)):
+        data_container.monster_attacks[i].terminate()
+        data_container.monster_attacks[i].join()
+    for j in range(len(data_container.monster)):
+        distance = math.sqrt((data_container.warrior.x - data_container.monster[j].x) ** 2 +
+                             (data_container.warrioar.y - data_container.monster[j].y) ** 2)
+        if distance <= 20:
+            attack_process = tw.MonsterAttack(data_container.monster[j], data_container.warrior)
+            attack_process.start()
+            data_container.monster_attacks.append(attack_process)
+
 # ----------------------------------------------------------------------
 # Calls  main  to start the ball rolling.
 # ----------------------------------------------------------------------
-main()
+if __name__ == '__main__':
+    main()
