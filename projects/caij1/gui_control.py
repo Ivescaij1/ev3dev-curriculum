@@ -385,16 +385,21 @@ def main_gui(root, dc, eb):
         for i in range(len(data.monster)):
             distance = math.sqrt((data.warrior.x - data.monster[i].x) ** 2 +
                                  (data.warrior.y - data.monster[i].y) ** 2)
-            angle = data.warrior.towards - math.atan((data.monster[i].y - data.warrior.y)/(data.monster[i].x - data.warrior.x)) / math.pi * 180
+            if distance <= 50:
+                monster_attack = data.monster[i].attack()
+                data.warrior.get_hurt(monster_attack)
+        for j in range(len(data.monster)):
+            distance = math.sqrt((data.warrior.x - data.monster[j].x) ** 2 +
+                                 (data.warrior.y - data.monster[j].y) ** 2)
+            angle = data.warrior.towards - math.atan((data.monster[j].y - data.warrior.y)/(data.monster[j].x - data.warrior.x)) / math.pi * 180
             if distance <= 20:
                 if -60 <= angle <= 60:
                     damage = data.warrior.attack()
-                    exp = data.monster[i].get_hurt(damage)
+                    exp = data.monster[j].get_hurt(damage)
                     data.warrior.obtain_exp(exp)
                     if exp > 0:
-                        data.monster.remove(data.monster[i])
-                monster_attack = data.monster[i].attack()
-                data.warrior.get_hurt(monster_attack)
+                        data.monster.remove(data.monster[j])
+                        break
         eb.refresh(data.warrior)
 
     def handle_d_attack_button(data):
@@ -402,16 +407,21 @@ def main_gui(root, dc, eb):
         for i in range(len(data.monster)):
             distance = math.sqrt((data.warrior.x - data.monster[i].x) ** 2 +
                                  (data.warrior.y - data.monster[i].y) ** 2)
-            angle = data.warrior.towards - math.atan((data.monster[i].y - data.warrior.y)/(data.monster[i].x - data.warrior.x)) / math.pi * 180
+            if distance <= 50:
+                monster_attack = data.monster[i].attack() * 0.5
+                data.warrior.get_hurt(monster_attack)
+        for j in range(len(data.monster)):
+            distance = math.sqrt((data.warrior.x - data.monster[j].x) ** 2 +
+                                 (data.warrior.y - data.monster[j].y) ** 2)
+            angle = data.warrior.towards - math.atan((data.monster[j].y - data.warrior.y)/(data.monster[j].x - data.warrior.x)) / math.pi * 180
             if distance <= 50:
                 if -30 <= angle <= 30:
                     damage = data.warrior.distance_attack()
-                    exp = data.monster[i].get_hurt(damage)
+                    exp = data.monster[j].get_hurt(damage)
                     data.warrior.obtain_exp(exp)
                     if exp > 0:
-                        data.monster.remove(data.monster[i])
-                monster_attack = data.monster[i].attack() * 0.5
-                data.warrior.get_hurt(monster_attack)
+                        data.monster.remove(data.monster[j])
+                        break
         eb.refresh(data.warrior)
 
     def handle_rest_button(data):
@@ -494,16 +504,13 @@ def pop_up(data):
     window = tk.Toplevel()
     window.grid_rowconfigure([0, 4, 6, 8, 10], weight=1)
     window.grid_columnconfigure([0, 4, 6, 10], weight=1)
-    old_nums = [data.warrior.skill_point,
+    new_nums = [data.warrior.skill_point,
                 data.warrior.max_hp, data.warrior.str, data.warrior.vit,
                 data.warrior.max_mp, data.warrior.int, data.warrior.agi]
-    new_nums = []
-    for k in range(len(old_nums)):
-        new_nums.append(int(old_nums[k]))
 
     sp_box = tk.Entry(window, width=4, justify=tk.CENTER)
     sp_box.grid(row=2, column=5)
-    sp_box.insert(0, old_nums[0])
+    sp_box.insert(0, new_nums[0])
     sp_label = tk.Label(window, text='Available skill points')
     sp_label.grid(row=1, column=5)
 
@@ -511,7 +518,7 @@ def pop_up(data):
     hp_label.grid(row=3, column=1)
     hp_box = tk.Entry(window, width=4, justify=tk.CENTER)
     hp_box.grid(row=3, column=2)
-    hp_box.insert(0, old_nums[1])
+    hp_box.insert(0, new_nums[1])
     hp_button = tk.Button(window, text="+hp", height=1, width=4)
     hp_button.grid(row=3, column=3)
     hp_button['command'] = lambda: handle_hp_button()
@@ -520,25 +527,25 @@ def pop_up(data):
     str_label.grid(row=5, column=1)
     str_box = tk.Entry(window, width=4, justify=tk.CENTER)
     str_box.grid(row=5, column=2)
-    str_box.insert(0, old_nums[2])
+    str_box.insert(0, new_nums[2])
     str_button = tk.Button(window, text="+str", height=1, width=4)
     str_button.grid(row=5, column=3)
-    str_button['command'] = lambda: print("button")
+    str_button['command'] = lambda: handle_str_button()
 
     vit_label = tk.Label(window, text='Vitality')
     vit_label.grid(row=7, column=1)
     vit_box = tk.Entry(window, width=4, justify=tk.CENTER)
     vit_box.grid(row=7, column=2)
-    vit_box.insert(0, old_nums[3])
+    vit_box.insert(0, new_nums[3])
     vit_button = tk.Button(window, text="+vit", height=1, width=4)
     vit_button.grid(row=7, column=3)
-    vit_button['command'] = lambda: print("button")
+    vit_button['command'] = lambda: handle_vit_button()
 
     mp_label = tk.Label(window, text='MP')
     mp_label.grid(row=3, column=7)
     mp_box = tk.Entry(window, width=4, justify=tk.CENTER)
     mp_box.grid(row=3, column=8)
-    mp_box.insert(0, old_nums[4])
+    mp_box.insert(0, new_nums[4])
     mp_button = tk.Button(window, text="+mp", height=1, width=4)
     mp_button.grid(row=3, column=9)
     mp_button['command'] = lambda: print("button")
@@ -547,7 +554,7 @@ def pop_up(data):
     int_label.grid(row=5, column=7)
     int_box = tk.Entry(window, width=4, justify=tk.CENTER)
     int_box.grid(row=5, column=8)
-    int_box.insert(0, old_nums[5])
+    int_box.insert(0, new_nums[5])
     int_button = tk.Button(window, text="+int", height=1, width=4)
     int_button.grid(row=5, column=9)
     int_button['command'] = lambda: print("button")
@@ -556,13 +563,14 @@ def pop_up(data):
     agi_label.grid(row=7, column=7)
     agi_box = tk.Entry(window, width=4, justify=tk.CENTER)
     agi_box.grid(row=7, column=8)
-    agi_box.insert(0, old_nums[6])
+    agi_box.insert(0, new_nums[6])
     agi_button = tk.Button(window, text="+agi", height=1, width=4)
     agi_button.grid(row=7, column=9)
     agi_button['command'] = lambda: print("button")
 
     confirm = tk.Button(window, text="Confirm\n<Enter>", height=2, width=8)
     confirm.grid(row=9, column=4)
+    confirm['command'] = lambda: handle_confirm_button()
     window.bind('<Return>', lambda event: handle_confirm_button())
 
     window_destroy = tk.Button(window, text="Exit\n<P>", height=2, width=8)
@@ -573,15 +581,43 @@ def pop_up(data):
     def handle_confirm_button():
         data.warrior.skill_point = new_nums[0]
         data.warrior.max_hp = new_nums[1]
+        data.warrior.str = new_nums[2]
+        data.warrior.vit = new_nums[3]
+        data.warrior.max_mp = new_nums[4]
+        data.warrior.int = new_nums[5]
+        data.warrior.agi = new_nums[6]
+
+        data.warrior.hp = data.warrior.max_hp
+        data.warrior.mp = data.warrior.max_mp
 
     def handle_hp_button():
         if new_nums[0] > 0:
             new_nums[0] = new_nums[0] - 1
             sp_box.delete(0, 'end')
-            hp_box.insert(0, new_nums[0])
+            sp_box.insert(0, new_nums[0])
             new_nums[1] = new_nums[1] + 10
             hp_box.delete(0, 'end')
             hp_box.insert(0, new_nums[1])
+
+    def handle_str_button():
+        if new_nums[0] > 0:
+            new_nums[0] = new_nums[0] - 1
+            sp_box.delete(0, 'end')
+            sp_box.insert(0, new_nums[0])
+            new_nums[2] = new_nums[2] + 1
+            str_box.delete(0, 'end')
+            str_box.insert(0, new_nums[2])
+
+    def handle_vit_button():
+        if new_nums[0] > 0:
+            new_nums[0] = new_nums[0] - 1
+            sp_box.delete(0, 'end')
+            sp_box.insert(0, new_nums[0])
+            new_nums[3] = new_nums[3] + 1
+            vit_box.delete(0, 'end')
+            vit_box.insert(0, new_nums[3])
+
+
 
 
 

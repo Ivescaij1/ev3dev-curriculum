@@ -62,8 +62,8 @@ class Warrior(object):
             print('You avoid '+str(percent_avoid * 100)+' percent damage by agi')
         else:
             percent_avoid = 0
-
-        self.hp = self.hp - damage * (1 - percent_avoid)
+        print('You avoid '+str(0.5 * self.vit)+' point damage by agi')
+        self.hp = self.hp - (damage * (1 - percent_avoid) - 0.5 * self.vit)
         if self.hp <= 0:
             print('You are Dead')
 
