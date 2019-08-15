@@ -17,7 +17,7 @@ class DataContainer(object):
         self.warrior = None
         self.turtle = None
         self.robot = None
-        self.mqtt = MqttConnect()
+        # self.mqtt = MqttConnect()
 
         self.save = tw.Warrior()
         self.save.state = False
@@ -46,13 +46,14 @@ class EntryBoxes(object):
         self.hp.insert(0, str(warrior_in_data.hp))
         self.mp.insert(0, str(warrior_in_data.mp))
 
+
 class MqttConnect(object):
-        def __init__(self):
-            ev3_delegate = delegates.Ev3Delegate()
-            mqtt_client = com.MqttClient(ev3_delegate)
-            mqtt_client.connect_to_pc()
-            ev3_delegate.loop_forever()
-            print("Shutdown complete.")
+    def __init__(self):
+        ev3_delegate = delegates.Ev3Delegate()
+        mqtt_client = com.MqttClient(ev3_delegate)
+        mqtt_client.connect_to_pc()
+        ev3_delegate.loop_forever()
+        print("Shutdown complete.")
 
 
 def main():
