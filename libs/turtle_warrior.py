@@ -33,6 +33,8 @@ class Warrior(object):
             self.exp = self.exp - self.lv
             self.lv = self.lv + 1
             self.skill_point = self.skill_point + 2
+            self.hp = self.max_hp
+            self.mp = self.max_mp
             print('You get upgrade! You get two skill points!')
 
     def rest(self):

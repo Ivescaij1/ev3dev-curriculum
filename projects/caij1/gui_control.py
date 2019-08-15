@@ -495,11 +495,11 @@ def pop_up(data):
     window.grid_rowconfigure([0, 4, 6, 8, 10], weight=1)
     window.grid_columnconfigure([0, 4, 6, 10], weight=1)
     old_nums = [data.warrior.skill_point,
-                data.warrior.hp, data.warrior.str, data.warrior.vit,
-                data.warrior.mp, data.warrior.int, data.warrior.agi]
+                data.warrior.max_hp, data.warrior.str, data.warrior.vit,
+                data.warrior.max_mp, data.warrior.int, data.warrior.agi]
     new_nums = []
     for k in range(len(old_nums)):
-        new_nums = new_nums + [int(old_nums[k])]
+        new_nums.append(int(old_nums[k]))
 
     sp_box = tk.Entry(window, width=4, justify=tk.CENTER)
     sp_box.grid(row=2, column=5)
@@ -571,12 +571,17 @@ def pop_up(data):
     window.bind('<p>', lambda event: window.destroy())
 
     def handle_confirm_button():
-        for k in range(len(new_nums)):
-            old_nums[k] = new_nums[k]
+        data.warrior.skill_point = new_nums[0]
+        data.warrior.max_hp = new_nums[1]
 
     def handle_hp_button():
-        new_nums[0] = [new_nums[0] - 1]
-        new_nums[1] = [new_nums[0] + 10]
+        if new_nums[0] > 0:
+            new_nums[0] = new_nums[0] - 1
+            sp_box.delete(0, 'end')
+            hp_box.insert(0, new_nums[0])
+            new_nums[1] = new_nums[1] + 10
+            hp_box.delete(0, 'end')
+            hp_box.insert(0, new_nums[1])
 
 
 
