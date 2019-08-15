@@ -488,15 +488,22 @@ def menu_bar(root, dc):
             print('No Record Found')
 
 
-def pop_up(dc):
+def pop_up(data):
     """ Pops up a window, with a Label that shows some info. """
     # TODO:
     window = tk.Toplevel()
     window.grid_rowconfigure([0, 4, 6, 8, 10], weight=1)
     window.grid_columnconfigure([0, 4, 6, 10], weight=1)
+    old_nums = [data.warrior.skill_point,
+                data.warrior.hp, data.warrior.str, data.warrior.vit,
+                data.warrior.mp, data.warrior.int, data.warrior.agi]
+    new_nums = []
+    for k in range(len(old_nums)):
+        new_nums = new_nums + [int(old_nums[k])]
 
     sp_box = tk.Entry(window, width=4, justify=tk.CENTER)
     sp_box.grid(row=2, column=5)
+    sp_box.insert(0, old_nums[0])
     sp_label = tk.Label(window, text='Available skill points')
     sp_label.grid(row=1, column=5)
 
@@ -504,16 +511,16 @@ def pop_up(dc):
     hp_label.grid(row=3, column=1)
     hp_box = tk.Entry(window, width=4, justify=tk.CENTER)
     hp_box.grid(row=3, column=2)
-    hp_box.delete(0, 'end')
-    hp_box.insert(0, str(dc.warrior.hp))
+    hp_box.insert(0, old_nums[1])
     hp_button = tk.Button(window, text="+hp", height=1, width=4)
     hp_button.grid(row=3, column=3)
-    hp_button['command'] = lambda: print("button")
+    hp_button['command'] = lambda: handle_hp_button()
 
     str_label = tk.Label(window, text='Strength')
     str_label.grid(row=5, column=1)
     str_box = tk.Entry(window, width=4, justify=tk.CENTER)
     str_box.grid(row=5, column=2)
+    str_box.insert(0, old_nums[2])
     str_button = tk.Button(window, text="+str", height=1, width=4)
     str_button.grid(row=5, column=3)
     str_button['command'] = lambda: print("button")
@@ -522,6 +529,7 @@ def pop_up(dc):
     vit_label.grid(row=7, column=1)
     vit_box = tk.Entry(window, width=4, justify=tk.CENTER)
     vit_box.grid(row=7, column=2)
+    vit_box.insert(0, old_nums[3])
     vit_button = tk.Button(window, text="+vit", height=1, width=4)
     vit_button.grid(row=7, column=3)
     vit_button['command'] = lambda: print("button")
@@ -530,6 +538,7 @@ def pop_up(dc):
     mp_label.grid(row=3, column=7)
     mp_box = tk.Entry(window, width=4, justify=tk.CENTER)
     mp_box.grid(row=3, column=8)
+    mp_box.insert(0, old_nums[4])
     mp_button = tk.Button(window, text="+mp", height=1, width=4)
     mp_button.grid(row=3, column=9)
     mp_button['command'] = lambda: print("button")
@@ -538,6 +547,7 @@ def pop_up(dc):
     int_label.grid(row=5, column=7)
     int_box = tk.Entry(window, width=4, justify=tk.CENTER)
     int_box.grid(row=5, column=8)
+    int_box.insert(0, old_nums[5])
     int_button = tk.Button(window, text="+int", height=1, width=4)
     int_button.grid(row=5, column=9)
     int_button['command'] = lambda: print("button")
@@ -546,18 +556,28 @@ def pop_up(dc):
     agi_label.grid(row=7, column=7)
     agi_box = tk.Entry(window, width=4, justify=tk.CENTER)
     agi_box.grid(row=7, column=8)
+    agi_box.insert(0, old_nums[6])
     agi_button = tk.Button(window, text="+agi", height=1, width=4)
     agi_button.grid(row=7, column=9)
     agi_button['command'] = lambda: print("button")
 
     confirm = tk.Button(window, text="Confirm\n<Enter>", height=2, width=8)
     confirm.grid(row=9, column=4)
-    window.bind('<Return>', lambda event: print('Confirm'))
+    window.bind('<Return>', lambda event: handle_confirm_button())
 
     window_destroy = tk.Button(window, text="Exit\n<P>", height=2, width=8)
     window_destroy.grid(row=9, column=6)
     window_destroy['command'] = lambda: window.destroy()
     window.bind('<p>', lambda event: window.destroy())
+
+    def handle_confirm_button():
+        for k in range(len(new_nums)):
+            old_nums[k] = new_nums[k]
+
+    def handle_hp_button():
+        new_nums[0] = [new_nums[0] - 1]
+        new_nums[1] = [new_nums[0] + 10]
+
 
 
 # def check_distance(data_container):
