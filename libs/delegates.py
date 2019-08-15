@@ -32,3 +32,13 @@ class Ev3Delegate(object):
         if self.mqtt_client:
             self.mqtt_client.close()
         self.robot.shutdown()
+
+
+class PcDelegate(object):
+    """ Helper class that will receive MQTT messages from the EV3. """
+
+    def __init__(self):
+        self.return_from_sensor = False
+
+    def send_out(self, color_name):
+        return color_name

@@ -182,6 +182,7 @@ class Monster(object):
             return self.exp
         else:
             print('Monster still have', self.hp, 'points hp')
+            return 0
 
 
 class MonsterAttack(Process):

@@ -7,6 +7,8 @@ import turtle_warrior as tw
 import robot_controller as robo
 import ev3dev.ev3 as ev3
 import mqtt_remote_method_calls as com
+import delegates
+import time
 
 
 class DataContainer(object):
@@ -15,6 +17,7 @@ class DataContainer(object):
         self.warrior = None
         self.turtle = None
         self.robot = None
+        self.mqtt = MqttConnect()
 
         self.save = tw.Warrior()
         self.save.state = False
@@ -43,11 +46,14 @@ class EntryBoxes(object):
         self.hp.insert(0, str(warrior_in_data.hp))
         self.mp.insert(0, str(warrior_in_data.mp))
 
-class MQTT(object):
-    def __init__(self):
-        self.delegate = robo.Snatch3r()
-        self.mqtt_client = com.MqttClient(self.delegate)
-        mqtt_client.connect(my_name, team_member_name)
+class MqttConnect(object):
+        def __init__(self):
+            ev3_delegate = delegates.Ev3Delegate()
+            mqtt_client = com.MqttClient(ev3_delegate)
+            mqtt_client.connect_to_pc()
+            ev3_delegate.loop_forever()
+            print("Shutdown complete.")
+
 
 def main():
 
@@ -179,18 +185,18 @@ def main_gui(root, dc, eb):
 
     att_button = tk.Button(action_frame, text="Attack \n<J>", height=4, width=8)
     att_button.grid(row=3, column=2)
-    att_button['command'] = lambda: print("Att button") # TODO
-    root.bind('<j>', lambda event: print("Att key"))
+    att_button['command'] = lambda: handle_attack_button(dc)
+    root.bind('<j>', lambda event: handle_attack_button(dc))
 
     skill_button = tk.Button(action_frame, text="Fire Ball \n<K>", height=4, width=8)
     skill_button.grid(row=5, column=2)
-    skill_button['command'] = lambda: print("d Att button")
-    root.bind('<k>', lambda event: print("d Att key")) # TODO
+    skill_button['command'] = lambda: handle_d_attack_button(dc)
+    root.bind('<k>', lambda event: handle_d_attack_button(dc))
 
     rest_button = tk.Button(action_frame, text="Rest \n<L>", height=4, width=8)
     rest_button.grid(row=7, column=2)
-    rest_button['command'] = lambda: print("rest button")
-    root.bind('<l>', lambda event: print("rest key")) # TODO
+    rest_button['command'] = lambda: handle_rest_button(dc)
+    root.bind('<l>', lambda event: handle_rest_button(dc))
 
     # grid (3, 1) hp/mp & exit display frame
     exit_frame = tk.Frame(root, bg='orange red')
@@ -286,13 +292,14 @@ def main_gui(root, dc, eb):
                 else:
                     print('You have TOO MANY monsters')
 
-            #else: TODO
-                # if:
-                #     new_monster = tw.Monster(data.warrior, window)
-                #     new_monster.x = data.warrior.x + 10 * math.cos(data.warrior.toward)
-                #     new_monster.y = data.warrior.y + 10 * math.sin(data.warrior.toward)
-                #     new_monster.draw()
-                #     data.Monster = data.Monster + [new_monster]
+            else:
+                color = data.robot.send_color()
+                if color != "White":
+                    new_monster = tw.Monster(data.warrior, window)
+                    new_monster.x = data.warrior.x + 10 * math.cos(data.warrior.towards)
+                    new_monster.y = data.warrior.y + 10 * math.sin(data.warrior.towards)
+                    new_monster.draw()
+                    data.Monster = data.Monster + [new_monster]
             print('Notice: Bigger == Stronger')
 
     def handle_map_button(data, robot):
@@ -351,7 +358,7 @@ def main_gui(root, dc, eb):
         print('Space')
         data.turtle.move_to(data.warrior.x, data.warrior.y)
         eb.refresh(data.warrior)
-        check_distance(data)
+        # check_distance(data)
 
     def handle_turn_button(data, entry_boxes):
         print("Turn button")
@@ -372,10 +379,41 @@ def main_gui(root, dc, eb):
         eb.refresh(data.warrior)
 
     def handle_attack_button(data):
+        print('Attack')
+        for i in range(len(data.monster)):
+            distance = math.sqrt((data.warrior.x - data.monster[i].x) ** 2 +
+                                 (data.warrioar.y - data.monster[i].y) ** 2)
+            angle = math.atan2((data.warrioar.y - data.monster[i].y), (data.warrior.x - data.monster[i].x))
+            if distance <= 10:
+                if -60 <= angle <= 60:
+                    damage = data.warrior.attack()
+                    exp = data.monster[i].get_hurt(damage)
+                    data.warrior.obtain_exp(exp)
+                monster_attack = data.monster[i].attack
+                data.warrior.get_hurt(monster_attack)
+        eb.refresh(data.warrior)
 
     def handle_d_attack_button(data):
+        print('Attack')
+        for i in range(len(data.monster)):
+            distance = math.sqrt((data.warrior.x - data.monster[i].x) ** 2 +
+                                 (data.warrioar.y - data.monster[i].y) ** 2)
+            angle = math.atan2((data.warrioar.y - data.monster[i].y), (data.warrior.x - data.monster[i].x))
+            if distance <= 30:
+                if -30 <= angle <= 30:
+                    damage = data.warrior.distance_attack()
+                    exp = data.monster[i].get_hurt(damage)
+                    data.warrior.obtain_exp(exp)
+                monster_attack = data.monster[i].attack * 0.8
+                data.warrior.get_hurt(monster_attack)
+        eb.refresh(data.warrior)
 
     def handle_rest_button(data):
+        while True:
+            print("rest")
+            data.warrior.rest()
+            eb.refresh(data.warrior)
+            time.sleep(0.5)
 
 
 def menu_bar(root, dc):
@@ -516,17 +554,17 @@ def pop_up():
     window.bind('<p>', lambda event: window.destroy())
 
 
-def check_distance(data_container):
-    for i in range(len(data_container.monster_attacks)):
-        data_container.monster_attacks[i].terminate()
-        data_container.monster_attacks[i].join()
-    for j in range(len(data_container.monster)):
-        distance = math.sqrt((data_container.warrior.x - data_container.monster[j].x) ** 2 +
-                             (data_container.warrioar.y - data_container.monster[j].y) ** 2)
-        if distance <= 20:
-            attack_process = tw.MonsterAttack(data_container.monster[j], data_container.warrior)
-            attack_process.start()
-            data_container.monster_attacks.append(attack_process)
+# def check_distance(data_container):
+#     for i in range(len(data_container.monster_attacks)):
+#         data_container.monster_attacks[i].terminate()
+#         data_container.monster_attacks[i].join()
+#     for j in range(len(data_container.monster)):
+#         distance = math.sqrt((data_container.warrior.x - data_container.monster[j].x) ** 2 +
+#                              (data_container.warrioar.y - data_container.monster[j].y) ** 2)
+#         if distance <= 20:
+#             attack_process = tw.MonsterAttack(data_container.monster[j], data_container.warrior)
+#             attack_process.start()
+#             data_container.monster_attacks.append(attack_process)
 
 # ----------------------------------------------------------------------
 # Calls  main  to start the ball rolling.

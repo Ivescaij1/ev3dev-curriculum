@@ -15,6 +15,8 @@
 import ev3dev.ev3 as ev3
 import math
 import time
+import delegates
+import mqtt_remote_method_calls as com
 
 
 class Snatch3r(object):
@@ -26,9 +28,14 @@ class Snatch3r(object):
         self.right_motor = ev3.LargeMotor(ev3.OUTPUT_C)
         self.arm_motor = ev3.MediumMotor(ev3.OUTPUT_A)
         self.touch_sensor = ev3.TouchSensor()
-        self.color_senor = ev3.ColorSensor()
+        self.color_sensor = ev3.ColorSensor()
         self.ir_sensor = ev3.InfraredSensor()
         self.pixy = ev3.Sensor(drive_name="pixy-lego")
+
+
+        pc_delegate = delegates.PcDelegate()
+        self.mqtt_client = com.MqttClient(pc_delegate)
+        self.mqtt_client.connect_to_ev3()
 
     def drive_inches(self, distance_inches, speed_sp):
         """ Drive the robert a fixed number of inches with constant speed
@@ -136,9 +143,39 @@ class Snatch3r(object):
         while self.running:
             ev3.Sound.beep().wait()
 
+    def send_color(self):
+        assert self.color_sensor.connected
+        last_color_spoken = 0
+
+        while True:
+            current_color = self.color_sensor.color
+            if current_color == ev3.ColorSensor.COLOR_NOCOLOR:
+                last_color_spoken = current_color  # Clear the saved value
+            else:
+                if current_color != last_color_spoken:
+                    last_color_spoken = current_color  # Avoid saying the name again immediately.
+                    if current_color == ev3.ColorSensor.COLOR_BLACK:
+                        self.mqtt_client.send_message("Black")
+                        ev3.Sound.speak("Black").wait()
+                    elif current_color == ev3.ColorSensor.COLOR_BLUE:
+                        self.mqtt_client.send_message("Blue")
+                        ev3.Sound.speak("Blue").wait()
+                    elif current_color == ev3.ColorSensor.COLOR_GREEN:
+                        self.mqtt_client.send_message("Green")
+                        ev3.Sound.speak("Green").wait()
+                    elif current_color == ev3.ColorSensor.COLOR_YELLOW:
+                        self.mqtt_client.send_message("Yellow")
+                        ev3.Sound.speak("Yellow").wait()
+                    elif current_color == ev3.ColorSensor.COLOR_RED:
+                        self.mqtt_client.send_message("Red")
+                        ev3.Sound.speak("Red").wait()
+                    elif current_color == ev3.ColorSensor.COLOR_WHITE:
+                        self.mqtt_client.send_message("White")
+                        ev3.Sound.speak("White").wait()
+                    elif current_color == ev3.ColorSensor.COLOR_BROWN:
+                        self.mqtt_client.send_message("Brown")
+                        ev3.Sound.speak("Brown").wait()
+            time.sleep(0.05)
 
 
     # def main_sensor(self):
-    #
-    #
-    # def color_sensor(self):
