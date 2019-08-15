@@ -63,7 +63,7 @@ def main():
 
     dc = DataContainer()
     eb = EntryBoxes()
-    dc.robot = robo.Snatch3r()
+    # dc.robot = robo.Snatch3r()
     main_gui(root, dc, eb)
     menu_bar(root, dc)
 
@@ -121,8 +121,8 @@ def main_gui(root, dc, eb):
 
     character_button = ttk.Button(start_frame, text="Character <P>", width=12)
     character_button.grid(row=1, column=5)
-    character_button['command'] = lambda: pop_up()
-    root.bind('<p>', lambda event: pop_up())
+    character_button['command'] = lambda: pop_up(dc)
+    root.bind('<p>', lambda event: pop_up(dc))
 
     # grid(1,3) TOP right frame that contain the direction label and entry box
     # 1 column, 2 row used, with one free column/row for sticky room
@@ -246,7 +246,7 @@ def main_gui(root, dc, eb):
     down_button = tk.Button(turn_frame, text="Down", height=4, width=8)
     down_button.grid(row=3, column=2)
     down_button['command'] = lambda: print("Down button")
-    root.bind('<j>', lambda event: print("Down key"))
+    root.bind('<i>', lambda event: print("Down key"))
 
     # grid(3,2): Text display frame with tkinter text widget, free grid around perimeter.
     # 1 character width = 15 pixel with 24 font
@@ -255,7 +255,7 @@ def main_gui(root, dc, eb):
     text_frame.grid_rowconfigure([0, 2], weight=1)
     text_frame.grid_columnconfigure([0, 2], weight=1)
 
-    textbox = tk.Text(text_frame, width=64, height=5, font=('Comic Sans MS', 24, 'bold'), background='lightgray')
+    textbox = tk.Text(text_frame, width=64, height=7, font=('Comic Sans MS', 24, 'bold'), background='lightgray')
     textbox.grid(row=1, column=1)
     textbox.tag_configure("center", justify='center')
 
@@ -290,6 +290,7 @@ def main_gui(root, dc, eb):
                         new_monster = tw.Monster(data.warrior, window)
                         new_monster.draw()
                         data.monster.append(new_monster)
+                        print(str(new_monster.x)+' , '+str(new_monster.y))
                 else:
                     print('You have TOO MANY monsters')
 
@@ -326,31 +327,31 @@ def main_gui(root, dc, eb):
     def handle_forward_button(data):
         print("Forward button")
         data.turtle.move(data.warrior.agi)
-        data.warrior.x = data.warrior.x + data.warrior.agi * math.cos(data.warrior.towards)
-        data.warrior.y = data.warrior.y - data.warrior.agi * math.sin(data.warrior.towards)
+        data.warrior.x = data.warrior.x + data.warrior.agi * math.cos(data.warrior.towards * math.pi / 180)
+        data.warrior.y = data.warrior.y - data.warrior.agi * math.sin(data.warrior.towards * math.pi / 180)
         eb.refresh(data.warrior)
         # check_distance(data)
 
     def handle_backward_button(data):
         print("Back button")
         data.turtle.move(-data.warrior.agi)
-        data.warrior.x = data.warrior.x - data.warrior.agi * math.cos(data.warrior.towards)
-        data.warrior.y = data.warrior.y + data.warrior.agi * math.sin(data.warrior.towards)
+        data.warrior.x = data.warrior.x - data.warrior.agi * math.cos(data.warrior.towards * math.pi / 180)
+        data.warrior.y = data.warrior.y + data.warrior.agi * math.sin(data.warrior.towards * math.pi / 180)
         eb.refresh(data.warrior)
         # check_distance(data)
 
     def handle_left_button(data):
         print("Left button")
-        data.warrior.x = data.warrior.x - data.warrior.agi * math.sin(data.warrior.towards)
-        data.warrior.y = data.warrior.y - data.warrior.agi * math.cos(data.warrior.towards)
+        data.warrior.x = data.warrior.x - data.warrior.agi * math.sin(data.warrior.towards * math.pi / 180)
+        data.warrior.y = data.warrior.y - data.warrior.agi * math.cos(data.warrior.towards * math.pi / 180)
         data.turtle.move_to(data.warrior.x, data.warrior.y)
         eb.refresh(data.warrior)
         # check_distance(data)
 
     def handle_right_button(data):
         print("Right button")
-        data.warrior.x = data.warrior.x + data.warrior.agi * math.sin(data.warrior.towards)
-        data.warrior.y = data.warrior.y + data.warrior.agi * math.cos(data.warrior.towards)
+        data.warrior.x = data.warrior.x + data.warrior.agi * math.sin(data.warrior.towards * math.pi / 180)
+        data.warrior.y = data.warrior.y + data.warrior.agi * math.cos(data.warrior.towards * math.pi / 180)
         data.turtle.move_to(data.warrior.x, data.warrior.y)
         eb.refresh(data.warrior)
         # check_distance(data)
@@ -383,38 +384,40 @@ def main_gui(root, dc, eb):
         print('Attack')
         for i in range(len(data.monster)):
             distance = math.sqrt((data.warrior.x - data.monster[i].x) ** 2 +
-                                 (data.warrioar.y - data.monster[i].y) ** 2)
-            angle = math.atan2((data.warrioar.y - data.monster[i].y), (data.warrior.x - data.monster[i].x))
-            if distance <= 10:
+                                 (data.warrior.y - data.monster[i].y) ** 2)
+            angle = data.warrior.towards - math.atan((data.monster[i].y - data.warrior.y)/(data.monster[i].x - data.warrior.x)) / math.pi * 180
+            if distance <= 20:
                 if -60 <= angle <= 60:
                     damage = data.warrior.attack()
                     exp = data.monster[i].get_hurt(damage)
                     data.warrior.obtain_exp(exp)
-                monster_attack = data.monster[i].attack
+                    if exp > 0:
+                        data.monster.remove(data.monster[i])
+                monster_attack = data.monster[i].attack()
                 data.warrior.get_hurt(monster_attack)
         eb.refresh(data.warrior)
 
     def handle_d_attack_button(data):
-        print('Attack')
+        print('D_Attack')
         for i in range(len(data.monster)):
             distance = math.sqrt((data.warrior.x - data.monster[i].x) ** 2 +
-                                 (data.warrioar.y - data.monster[i].y) ** 2)
-            angle = math.atan2((data.warrioar.y - data.monster[i].y), (data.warrior.x - data.monster[i].x))
-            if distance <= 30:
+                                 (data.warrior.y - data.monster[i].y) ** 2)
+            angle = data.warrior.towards - math.atan((data.monster[i].y - data.warrior.y)/(data.monster[i].x - data.warrior.x)) / math.pi * 180
+            if distance <= 50:
                 if -30 <= angle <= 30:
                     damage = data.warrior.distance_attack()
                     exp = data.monster[i].get_hurt(damage)
                     data.warrior.obtain_exp(exp)
-                monster_attack = data.monster[i].attack * 0.8
+                    if exp > 0:
+                        data.monster.remove(data.monster[i])
+                monster_attack = data.monster[i].attack() * 0.5
                 data.warrior.get_hurt(monster_attack)
         eb.refresh(data.warrior)
 
     def handle_rest_button(data):
-        while True:
-            print("rest")
-            data.warrior.rest()
-            eb.refresh(data.warrior)
-            time.sleep(0.5)
+        print("rest")
+        data.warrior.rest()
+        eb.refresh(data.warrior)
 
 
 def menu_bar(root, dc):
@@ -435,7 +438,7 @@ def menu_bar(root, dc):
     game_menu = tk.Menu(menubar)
     menubar.add_cascade(menu=game_menu, label='Game')
     game_menu.add_command(label='Character',
-                          command=lambda: pop_up())
+                          command=lambda: pop_up(dc))
 
     def save():
         print('MenuSave')
@@ -485,7 +488,7 @@ def menu_bar(root, dc):
             print('No Record Found')
 
 
-def pop_up():
+def pop_up(dc):
     """ Pops up a window, with a Label that shows some info. """
     # TODO:
     window = tk.Toplevel()
@@ -501,6 +504,8 @@ def pop_up():
     hp_label.grid(row=3, column=1)
     hp_box = tk.Entry(window, width=4, justify=tk.CENTER)
     hp_box.grid(row=3, column=2)
+    hp_box.delete(0, 'end')
+    hp_box.insert(0, str(dc.warrior.hp))
     hp_button = tk.Button(window, text="+hp", height=1, width=4)
     hp_button.grid(row=3, column=3)
     hp_button['command'] = lambda: print("button")
@@ -561,7 +566,7 @@ def pop_up():
 #         data_container.monster_attacks[i].join()
 #     for j in range(len(data_container.monster)):
 #         distance = math.sqrt((data_container.warrior.x - data_container.monster[j].x) ** 2 +
-#                              (data_container.warrioar.y - data_container.monster[j].y) ** 2)
+#                              (data_container.warrior.y - data_container.monster[j].y) ** 2)
 #         if distance <= 20:
 #             attack_process = tw.MonsterAttack(data_container.monster[j], data_container.warrior)
 #             attack_process.start()

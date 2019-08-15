@@ -28,7 +28,7 @@ class Warrior(object):
 
     def obtain_exp(self, exp):
         self.exp = self.exp + exp
-        print('You get exp: ', exp, 'points!')
+        print('You get exp: '+str(exp)+' points!')
         while self.exp > self.lv:
             self.exp = self.exp - self.lv
             self.lv = self.lv + 1
@@ -52,12 +52,12 @@ class Warrior(object):
 
     def get_hurt(self, damage):
         ram = random.randint(0, 100)
-        if self.agi - ram < 0:
+        if self.agi - ram > 0:
             if self.agi - ram < 100:
                 percent_avoid = (self.agi - ram) / 100
             else:
                 percent_avoid = 1
-            print('You avoid', percent_avoid * 100, 'percent damage by agi')
+            print('You avoid '+str(percent_avoid * 100)+' percent damage by agi')
         else:
             percent_avoid = 0
 
@@ -67,13 +67,13 @@ class Warrior(object):
 
     def attack(self):
         damage = self.str
-        print('You make', damage, 'points damage')
+        print('You make '+str(damage)+' points damage')
         return damage
 
     def distance_attack(self):
         damage = self.int
         self.mp = self.mp - 2
-        print('You make', damage, 'points damage by 2 points mp')
+        print('You make '+str(damage)+' points damage by 2 points mp')
         return damage
 
     def move(self, delta_x, delta_y):
@@ -156,8 +156,10 @@ class VisualTurtle(object):
 
 class Monster(object):
     def __init__(self, warrior, canvas):
-        self.x = random.randint(-470, -470 + warrior.x_range)
-        self.y = random.randint(-190, -190 + warrior.y_range)
+        self.x = random.randint(0, warrior.x_range)
+        self.y = random.randint(0, warrior.y_range)
+        self.draw_x = self.x - 470
+        self.draw_y = self.y - 190
         self.lv = random.randint(0, 5) + warrior.lv
 
         self.random_bonus = random.randint(0, 10)
@@ -166,22 +168,24 @@ class Monster(object):
         self.hp = self.lv * 6 + self.random_bonus * 3
 
         self.canvas = canvas
+        self.display = None
 
     def draw(self):
-        self.canvas.create_oval(self.x + 3 - self.random_bonus, self.y + 3 - self.random_bonus,
-                                self.x + 3 + self.random_bonus, self.y + 3 + self.random_bonus, fill='black')
+        self.display = self.canvas.create_oval(self.draw_x + 3 - self.random_bonus, self.draw_y + 3 - self.random_bonus,
+                                self.draw_x + 3 + self.random_bonus, self.draw_y + 3 + self.random_bonus, fill='black')
 
     def attack(self):
         damage = self.str
-        print('Monster make', damage, 'points damage to you')
+        print('Monster make '+str(damage)+' points damage to you')
         return damage
 
     def get_hurt(self, damage):
         self.hp = self.hp - damage
         if self.hp <= 0:
+            self.canvas.delete(self.display)
             return self.exp
         else:
-            print('Monster still have', self.hp, 'points hp')
+            print('Monster still have '+str(self.hp)+' points hp')
             return 0
 
 
