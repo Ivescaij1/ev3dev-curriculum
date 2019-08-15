@@ -1,8 +1,6 @@
 
 import random
-import rosegraphics as rg
 import time
-import robot_controller as robo
 import turtle
 from multiprocessing import Process
 

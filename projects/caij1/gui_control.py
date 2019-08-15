@@ -6,6 +6,7 @@ from multiprocessing import Process
 import turtle_warrior as tw
 import robot_controller as robo
 import ev3dev.ev3 as ev3
+import mqtt_remote_method_calls as com
 
 
 class DataContainer(object):
@@ -42,6 +43,11 @@ class EntryBoxes(object):
         self.hp.insert(0, str(warrior_in_data.hp))
         self.mp.insert(0, str(warrior_in_data.mp))
 
+class MQTT(object):
+    def __init__(self):
+        self.delegate = robo.Snatch3r()
+        self.mqtt_client = com.MqttClient(self.delegate)
+        mqtt_client.connect(my_name, team_member_name)
 
 def main():
 

@@ -26,6 +26,9 @@ class Snatch3r(object):
         self.right_motor = ev3.LargeMotor(ev3.OUTPUT_C)
         self.arm_motor = ev3.MediumMotor(ev3.OUTPUT_A)
         self.touch_sensor = ev3.TouchSensor()
+        self.color_senor = ev3.ColorSensor()
+        self.ir_sensor = ev3.InfraredSensor()
+        self.pixy = ev3.Sensor(drive_name="pixy-lego")
 
     def drive_inches(self, distance_inches, speed_sp):
         """ Drive the robert a fixed number of inches with constant speed
@@ -46,6 +49,7 @@ class Snatch3r(object):
 
             self.left_motor.wait_while("running")
             self.right_motor.wait_while("running")
+            ev3.Sound.beep().wait()
 
     def turn_degrees(self, degrees_to_turn, turn_speed_sp):
         """ Turns a set of degrees, positive is left turn
@@ -67,6 +71,7 @@ class Snatch3r(object):
 
             self.left_motor.wait_while("running")
             self.right_motor.wait_while("running")
+            ev3.Sound.beep().wait()
 
     def arm_calibration(self):
         """
@@ -118,8 +123,19 @@ class Snatch3r(object):
             self.arm_motor.wait_while("running")  # Blocks until the motor finishes running
             ev3.Sound.beep().wait()
 
+    def loop_forever(self):
+        self.running = True
+        while self.running:
+            time.sleep(0.1)
+
     def shutdown(self):
+        ev3.Sound.speak("Goodbye").wait()
         self.running = False
+
+    def beep(self):
+        while self.running:
+            ev3.Sound.beep().wait()
+
 
 
     # def main_sensor(self):
