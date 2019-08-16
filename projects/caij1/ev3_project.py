@@ -298,8 +298,8 @@ def main_gui(root, dc, eb):
                 color = data.robot.send_color()
                 if color != "White":
                     new_monster = tw.Monster(data.warrior, window)
-                    new_monster.x = data.warrior.x + 10 * math.cos(data.warrior.towards)
-                    new_monster.y = data.warrior.y + 10 * math.sin(data.warrior.towards)
+                    new_monster.x = data.warrior.x + 20 * math.cos(data.warrior.towards)
+                    new_monster.y = data.warrior.y + 20 * math.sin(data.warrior.towards)
                     new_monster.draw()
                     data.Monster = data.Monster + [new_monster]
             print('Notice: Bigger == Stronger')
@@ -311,10 +311,8 @@ def main_gui(root, dc, eb):
                 data.turtle.draw_map()
 
                 data.mqtt.send_message('draw_map')
-                data.robot.left_motor.waitwhile(state='running')
                 data.mqtt.send_message('turn_degrees', [90, 900])
                 data.mqtt.send_message('draw_map')
-                data.robot.left_motor.waitwhile(state='running')
 
             elif ev3.LargeMotor(ev3.OUTPUT_B).connected:
                 data.turtle.draw_map(data.robot)
@@ -326,31 +324,48 @@ def main_gui(root, dc, eb):
                   'Press Start again to generate monsters')
 
     def handle_move_button(data, entry_boxes):
+        abs_x = int(entry_boxes.x.get())
+        abs_y = int(entry_boxes.y.get())
+        if data.mqtt:
+            angle_to_turn = 360 - data.warrior.towards
+            data.mqtt.send_message(angle_to_turn)
+            data.turtle.turn(angle_to_turn)
+            data.warrior.towards = 0
+            rel_x = (abs_x - data.warrior.x) / 10
+            rel_y = (abs_y - data.warrior.y) / 10
+            data.mqtt.send_message('move_to_rel_pos', [rel_x, rel_y])
         print("Button Move")
-        x = int(entry_boxes.x.get())
-        y = int(entry_boxes.y.get())
-        data.warrior.x = x
-        data.warrior.y = y
-        data.turtle.move_to(x, y)
+        data.warrior.x = abs_x
+        data.warrior.y = abs_x
+        data.turtle.move_to(abs_x, abs_y)
 
     def handle_forward_button(data):
+        distance = data.warrior.agi
         print("Forward button")
-        data.turtle.move(data.warrior.agi)
-        data.warrior.x = data.warrior.x + data.warrior.agi * math.cos(data.warrior.towards * math.pi / 180)
-        data.warrior.y = data.warrior.y - data.warrior.agi * math.sin(data.warrior.towards * math.pi / 180)
+        if data.mqtt:
+            data.mqtt.send_message('drive_inches', [(distance / 10), 900])
+        data.turtle.move(distance)
+        data.warrior.x = data.warrior.x + distance * math.cos(data.warrior.towards * math.pi / 180)
+        data.warrior.y = data.warrior.y - distance * math.sin(data.warrior.towards * math.pi / 180)
         eb.refresh(data.warrior)
         # check_distance(data)
 
     def handle_backward_button(data):
+        distance = - data.warrior.agi
         print("Back button")
-        data.turtle.move(-data.warrior.agi)
-        data.warrior.x = data.warrior.x - data.warrior.agi * math.cos(data.warrior.towards * math.pi / 180)
-        data.warrior.y = data.warrior.y + data.warrior.agi * math.sin(data.warrior.towards * math.pi / 180)
+        if data.mqtt:
+            data.mqtt.send_message('drive_inches', [(distance / 10), 900])
+        data.turtle.move(distance)
+        data.warrior.x = data.warrior.x - distance * math.cos(data.warrior.towards * math.pi / 180)
+        data.warrior.y = data.warrior.y + distance * math.sin(data.warrior.towards * math.pi / 180)
         eb.refresh(data.warrior)
         # check_distance(data)
 
     def handle_left_button(data):
         print("Left button")
+        if data.mqtt:
+            print('Robot cannot move horizontally')
+            return
         data.warrior.x = data.warrior.x - data.warrior.agi * math.sin(data.warrior.towards * math.pi / 180)
         data.warrior.y = data.warrior.y - data.warrior.agi * math.cos(data.warrior.towards * math.pi / 180)
         data.turtle.move_to(data.warrior.x, data.warrior.y)
@@ -359,6 +374,9 @@ def main_gui(root, dc, eb):
 
     def handle_right_button(data):
         print("Right button")
+        if data.mqtt:
+            print('Robot cannot move horizontally')
+            return
         data.warrior.x = data.warrior.x + data.warrior.agi * math.sin(data.warrior.towards * math.pi / 180)
         data.warrior.y = data.warrior.y + data.warrior.agi * math.cos(data.warrior.towards * math.pi / 180)
         data.turtle.move_to(data.warrior.x, data.warrior.y)
@@ -366,7 +384,9 @@ def main_gui(root, dc, eb):
         # check_distance(data)
 
     def handle_stop_button(data):
-        print('Space')
+        print('Stop')
+        if data.mqtt:
+            data.mqtt.send_message('stop')
         data.turtle.move_to(data.warrior.x, data.warrior.y)
         eb.refresh(data.warrior)
         # check_distance(data)
@@ -374,17 +394,23 @@ def main_gui(root, dc, eb):
     def handle_turn_button(data, entry_boxes):
         print("Turn button")
         degree = int(entry_boxes.direction.get())
+        if data.mqtt:
+            data.mqtt.send_message('turn_degrees', [degree, 900])
         data.warrior.towards = degree % 360
         data.turtle.turn(degree)
 
     def handle_left_turn(data):
         print('Turn left')
+        if data.mqtt:
+            data.mqtt.send_message('turn_degrees', [10, 900])
         data.turtle.turn(10)
         data.warrior.towards = (data.warrior.towards + 10) % 360
         eb.refresh(data.warrior)
 
     def handle_right_turn(data):
         print('Turn left')
+        if data.mqtt:
+            data.mqtt.send_message('turn_degrees', [-10, 900])
         data.turtle.turn(-10)
         data.warrior.towards = (data.warrior.towards - 10) % 360
         eb.refresh(data.warrior)
@@ -410,6 +436,10 @@ def main_gui(root, dc, eb):
                         data.monster.remove(data.monster[j])
                         break
         eb.refresh(data.warrior)
+        if data.mqtt:
+            data.mqtt.send_message('arm_up')
+            time.sleep(1.0)
+            data.mqtt.send_message('arm_down')
 
     def handle_d_attack_button(data):
         print('D_Attack')
@@ -432,11 +462,17 @@ def main_gui(root, dc, eb):
                         data.monster.remove(data.monster[j])
                         break
         eb.refresh(data.warrior)
+        if data.mqtt:
+            data.mqtt.send_message('arm_up')
+            time.sleep(2.0)
+            data.mqtt.send_message('arm_down')
 
     def handle_rest_button(data):
         print("rest")
         data.warrior.rest()
         eb.refresh(data.warrior)
+        if data.mqtt:
+            data.mqtt.send_message('beep')
 
 
 def menu_bar(root, dc):

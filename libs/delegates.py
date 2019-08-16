@@ -31,6 +31,14 @@ class Ev3Delegate(object):
             time.sleep(0.5)
             self.robot.distance_to_stop()
 
+    def move_to_rel_pos(self, x, y):
+        self.robot.drive_inches(x, 900)
+        self.robot.turn_degrees(90, 900)
+        self.robot.drive_inches(y, 900)
+
+    def stop(self):
+        self.robot.stop()
+
     def loop_forever(self):
         while self.robot.running:
             # do stuff
