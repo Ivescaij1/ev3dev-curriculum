@@ -25,6 +25,12 @@ class Ev3Delegate(object):
     def beep(self):
         self.robot.beep()
 
+    def drive_to_wall(self):
+        while True:
+            self.robot.drive_forever()
+            time.sleep(0.5)
+            self.robot.distance_to_stop()
+
     def loop_forever(self):
         while self.robot.running:
             # do stuff

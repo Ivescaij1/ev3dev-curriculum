@@ -37,6 +37,24 @@ class Snatch3r(object):
         self.mqtt_client = com.MqttClient(pc_delegate)
         self.mqtt_client.connect_to_ev3()
 
+    def drive_forever(self):
+        assert self.left_motor.connected
+        assert self.right_motor.connected
+
+        self.left_motor.run_forever(speed_sp=900)
+        self.right_motor.run_forever(speed_sp=900)
+
+    def stop(self):
+        self.right_motor.stop(stop_action='brake')
+        self.left_motor.stop(stop_action='brake')
+        self.arm_motor.stop(stop_action='brake')
+
+    def distance_to_stop(self):
+        assert self.ir_sensor
+        current_proximity = self.ir_sensor.proximity
+        if current_proximity <= 50:
+            self.stop()
+
     def drive_inches(self, distance_inches, speed_sp):
         """ Drive the robert a fixed number of inches with constant speed
         :param distance_inches: inches

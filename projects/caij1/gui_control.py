@@ -111,8 +111,8 @@ def main_gui(root, dc, eb):
 
     map_button = ttk.Button(start_frame, text="Map <M>", width=12)
     map_button.grid(row=1, column=1)
-    map_button['command'] = lambda: handle_map_button(dc, dc.robot)
-    root.bind('<m>', lambda event: handle_map_button(dc, dc.robot))
+    map_button['command'] = lambda: handle_map_button(dc)
+    root.bind('<m>', lambda event: handle_map_button(dc))
 
     start_button = ttk.Button(start_frame, text="Start <Enter>", width=12)
     start_button.grid(row=1, column=3)
@@ -304,11 +304,20 @@ def main_gui(root, dc, eb):
                     data.Monster = data.Monster + [new_monster]
             print('Notice: Bigger == Stronger')
 
-    def handle_map_button(data, robot):
+    def handle_map_button(data):
         print("Map")
         if data.running:
-            if ev3.LargeMotor(ev3.OUTPUT_B).connected:
-                data.turtle.draw_map(robot)
+            if data.mqtt:
+                data.turtle.draw_map()
+
+                data.mqtt.send_message('draw_map')
+                data.robot.left_motor.waitwhile(state='running')
+                data.mqtt.send_message('turn_degrees', [90, 900])
+                data.mqtt.send_message('draw_map')
+                data.robot.left_motor.waitwhile(state='running')
+
+            elif ev3.LargeMotor(ev3.OUTPUT_B).connected:
+                data.turtle.draw_map(data.robot)
             else:
                 data.turtle.generate_map()
         else:
@@ -499,8 +508,6 @@ def menu_bar(root, dc):
 
 
 def pop_up(data):
-    """ Pops up a window, with a Label that shows some info. """
-    # TODO:
     window = tk.Toplevel()
     window.grid_rowconfigure([0, 4, 6, 8, 10], weight=1)
     window.grid_columnconfigure([0, 4, 6, 10], weight=1)
@@ -548,7 +555,7 @@ def pop_up(data):
     mp_box.insert(0, new_nums[4])
     mp_button = tk.Button(window, text="+mp", height=1, width=4)
     mp_button.grid(row=3, column=9)
-    mp_button['command'] = lambda: print("button")
+    mp_button['command'] = lambda: handle_mp_button()
 
     int_label = tk.Label(window, text='Intelligence')
     int_label.grid(row=5, column=7)
@@ -557,7 +564,7 @@ def pop_up(data):
     int_box.insert(0, new_nums[5])
     int_button = tk.Button(window, text="+int", height=1, width=4)
     int_button.grid(row=5, column=9)
-    int_button['command'] = lambda: print("button")
+    int_button['command'] = lambda: handle_int_button()
 
     agi_label = tk.Label(window, text='Agility')
     agi_label.grid(row=7, column=7)
@@ -566,7 +573,7 @@ def pop_up(data):
     agi_box.insert(0, new_nums[6])
     agi_button = tk.Button(window, text="+agi", height=1, width=4)
     agi_button.grid(row=7, column=9)
-    agi_button['command'] = lambda: print("button")
+    agi_button['command'] = lambda: handle_agi_button()
 
     confirm = tk.Button(window, text="Confirm\n<Enter>", height=2, width=8)
     confirm.grid(row=9, column=4)
@@ -616,6 +623,33 @@ def pop_up(data):
             new_nums[3] = new_nums[3] + 1
             vit_box.delete(0, 'end')
             vit_box.insert(0, new_nums[3])
+
+    def handle_mp_button():
+        if new_nums[0] > 0:
+            new_nums[0] = new_nums[0] - 1
+            sp_box.delete(0, 'end')
+            sp_box.insert(0, new_nums[0])
+            new_nums[4] = new_nums[4] + 10
+            mp_box.delete(0, 'end')
+            mp_box.insert(0, new_nums[4])
+
+    def handle_int_button():
+        if new_nums[0] > 0:
+            new_nums[0] = new_nums[0] - 1
+            sp_box.delete(0, 'end')
+            sp_box.insert(0, new_nums[0])
+            new_nums[5] = new_nums[5] + 1
+            int_box.delete(0, 'end')
+            int_box.insert(0, new_nums[5])
+
+    def handle_agi_button():
+        if new_nums[0] > 0:
+            new_nums[0] = new_nums[0] - 1
+            sp_box.delete(0, 'end')
+            sp_box.insert(0, new_nums[0])
+            new_nums[6] = new_nums[6] + 1
+            agi_box.delete(0, 'end')
+            agi_box.insert(0, new_nums[6])
 
 
 
