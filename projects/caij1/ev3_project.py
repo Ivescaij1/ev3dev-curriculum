@@ -49,8 +49,11 @@ class EntryBoxes(object):
 class MqttConnect(object):
     def __init__(self):
         delegate = PcDelegate()
-        mqtt_client = com.MqttClient(delegate)
-        mqtt_client.connect_to_ev3()
+        self.mqtt_client = com.MqttClient(delegate)
+        self.mqtt_client.connect_to_ev3()
+
+    def send_msg(self, function_name, parameter_list=None):
+        self.mqtt_client.send_message(function_name, parameter_list)
 
 
 class PcDelegate(object):
@@ -328,9 +331,9 @@ def main_gui(root, dc, eb):
             if data.mqtt:
                 data.turtle.draw_map()
 
-                data.mqtt.send_message('draw_map')
-                data.mqtt.send_message('turn_degrees', [90, 900])
-                data.mqtt.send_message('draw_map')
+                data.mqtt.send_msg('draw_map')
+                data.mqtt.send_msg('turn_degrees', [90, 900])
+                data.mqtt.send_msg('draw_map')
 
             elif ev3.LargeMotor(ev3.OUTPUT_B).connected:
                 data.turtle.draw_map(data.robot)
@@ -346,12 +349,12 @@ def main_gui(root, dc, eb):
         abs_y = int(entry_boxes.y.get())
         if data.mqtt:
             angle_to_turn = 360 - data.warrior.towards
-            data.mqtt.send_message(angle_to_turn)
+            data.mqtt.send_msg('turn_degrees', angle_to_turn)
             data.turtle.turn(angle_to_turn)
             data.warrior.towards = 0
             rel_x = (abs_x - data.warrior.x) / 10
             rel_y = (abs_y - data.warrior.y) / 10
-            data.mqtt.send_message('move_to_rel_pos', [rel_x, rel_y])
+            data.mqtt.send_msg('move_to_rel_pos', [rel_x, rel_y])
         print("Button Move")
         data.warrior.x = abs_x
         data.warrior.y = abs_x
@@ -361,7 +364,7 @@ def main_gui(root, dc, eb):
         distance = data.warrior.agi
         print("Forward button")
         if data.mqtt:
-            data.mqtt.send_message('drive_inches', [(distance / 10), 900])
+            data.mqtt.send_msg('drive_inches', [(distance / 10), 900])
         data.turtle.move(distance)
         data.warrior.x = data.warrior.x + distance * math.cos(data.warrior.towards * math.pi / 180)
         data.warrior.y = data.warrior.y - distance * math.sin(data.warrior.towards * math.pi / 180)
@@ -372,7 +375,7 @@ def main_gui(root, dc, eb):
         distance = - data.warrior.agi
         print("Back button")
         if data.mqtt:
-            data.mqtt.send_message('drive_inches', [(distance / 10), 900])
+            data.mqtt.send_msg('drive_inches', [(distance / 10), 900])
         data.turtle.move(distance)
         data.warrior.x = data.warrior.x - distance * math.cos(data.warrior.towards * math.pi / 180)
         data.warrior.y = data.warrior.y + distance * math.sin(data.warrior.towards * math.pi / 180)
@@ -404,7 +407,7 @@ def main_gui(root, dc, eb):
     def handle_stop_button(data):
         print('Stop')
         if data.mqtt:
-            data.mqtt.send_message('stop')
+            data.mqtt.send_msg('stop')
         data.turtle.move_to(data.warrior.x, data.warrior.y)
         eb.refresh(data.warrior)
         # check_distance(data)
@@ -413,14 +416,14 @@ def main_gui(root, dc, eb):
         print("Turn button")
         degree = int(entry_boxes.direction.get())
         if data.mqtt:
-            data.mqtt.send_message('turn_degrees', [degree, 900])
+            data.mqtt.send_msg('turn_degrees', [degree, 900])
         data.warrior.towards = degree % 360
         data.turtle.turn(degree)
 
     def handle_left_turn(data):
         print('Turn left')
         if data.mqtt:
-            data.mqtt.send_message('turn_degrees', [10, 900])
+            data.mqtt.send_msg('turn_degrees', [10, 900])
         data.turtle.turn(10)
         data.warrior.towards = (data.warrior.towards + 10) % 360
         eb.refresh(data.warrior)
@@ -428,7 +431,7 @@ def main_gui(root, dc, eb):
     def handle_right_turn(data):
         print('Turn left')
         if data.mqtt:
-            data.mqtt.send_message('turn_degrees', [-10, 900])
+            data.mqtt.send_msg('turn_degrees', [-10, 900])
         data.turtle.turn(-10)
         data.warrior.towards = (data.warrior.towards - 10) % 360
         eb.refresh(data.warrior)
@@ -455,9 +458,9 @@ def main_gui(root, dc, eb):
                         break
         eb.refresh(data.warrior)
         if data.mqtt:
-            data.mqtt.send_message('arm_up')
+            data.mqtt.send_msg('arm_up')
             time.sleep(1.0)
-            data.mqtt.send_message('arm_down')
+            data.mqtt.send_msg('arm_down')
 
     def handle_d_attack_button(data):
         print('D_Attack')
@@ -481,16 +484,16 @@ def main_gui(root, dc, eb):
                         break
         eb.refresh(data.warrior)
         if data.mqtt:
-            data.mqtt.send_message('arm_up')
+            data.mqtt.send_msg('arm_up')
             time.sleep(2.0)
-            data.mqtt.send_message('arm_down')
+            data.mqtt.send_msg('arm_down')
 
     def handle_rest_button(data):
         print("rest")
         data.warrior.rest()
         eb.refresh(data.warrior)
         if data.mqtt:
-            data.mqtt.send_message('beep')
+            data.mqtt.send_msg('beep')
 
 
 def menu_bar(root, dc):
