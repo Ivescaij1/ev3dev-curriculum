@@ -7,7 +7,7 @@ import turtle_warrior as tw
 import robot_controller as robo
 import ev3dev.ev3 as ev3
 import mqtt_remote_method_calls as com
-import delegates
+import ev3_delegates
 import time
 
 
@@ -49,11 +49,32 @@ class EntryBoxes(object):
 
 class MqttConnect(object):
     def __init__(self):
-        ev3_delegate = delegates.Ev3Delegate()
-        mqtt_client = com.MqttClient(ev3_delegate)
-        mqtt_client.connect_to_pc()
-        ev3_delegate.loop_forever()
+        delegate = PcDelegate()
+        mqtt_client = com.MqttClient(delegate)
+        mqtt_client.connect_to_ev3()
+        delegate.loop_forever()
         print("Shutdown complete.")
+
+
+class PcDelegate(object):
+    """ Helper class that will receive MQTT messages from the EV3. """
+
+    def __init__(self):
+        self.running = True
+        self.mqtt_client = None
+
+    def send_out(self, color_name):
+        return color_name
+
+    def loop_forever(self):
+        while self.running:
+            time.sleep(0.01)
+        if self.mqtt_client:
+            self.mqtt_client.close()
+        self.shutdown()
+
+    def shutdown(self):
+        self.running = False
 
 
 def main():
@@ -295,7 +316,7 @@ def main_gui(root, dc, eb):
                     print('You have TOO MANY monsters')
 
             else:
-                color = data.robot.send_color()
+                color = data.mqtt.send_out()
                 if color != "White":
                     new_monster = tw.Monster(data.warrior, window)
                     new_monster.x = data.warrior.x + 20 * math.cos(data.warrior.towards)
@@ -686,8 +707,6 @@ def pop_up(data):
             new_nums[6] = new_nums[6] + 1
             agi_box.delete(0, 'end')
             agi_box.insert(0, new_nums[6])
-
-
 
 
 

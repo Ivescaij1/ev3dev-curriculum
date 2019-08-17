@@ -1,5 +1,6 @@
 import robot_controller as robo
 import time
+import mqtt_remote_method_calls as com
 
 
 class Ev3Delegate(object):
@@ -48,11 +49,13 @@ class Ev3Delegate(object):
         self.robot.shutdown()
 
 
-class PcDelegate(object):
-    """ Helper class that will receive MQTT messages from the EV3. """
+def main():
+    delegate = Ev3Delegate()
+    mqtt_client = com.MqttClient(delegate)
+    delegate.mqtt_client = mqtt_client
+    mqtt_client.connect_to_pc()
+    delegate.loop_forever()
+    print("shutdown complete")
 
-    def __init__(self):
-        self.return_from_sensor = False
 
-    def send_out(self, color_name):
-        return color_name
+main()

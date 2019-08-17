@@ -15,7 +15,7 @@
 import ev3dev.ev3 as ev3
 import math
 import time
-import delegates
+import ev3_delegates
 import mqtt_remote_method_calls as com
 
 
@@ -31,11 +31,6 @@ class Snatch3r(object):
         self.color_sensor = ev3.ColorSensor()
         self.ir_sensor = ev3.InfraredSensor()
         self.pixy = ev3.Sensor(drive_name="pixy-lego")
-
-
-        pc_delegate = delegates.PcDelegate()
-        self.mqtt_client = com.MqttClient(pc_delegate)
-        self.mqtt_client.connect_to_ev3()
 
     def drive_forever(self):
         assert self.left_motor.connected
