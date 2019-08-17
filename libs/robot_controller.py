@@ -11,11 +11,9 @@
   could be called.  That way it's a generic action that could be used in any task.
 """
 
-# TODO: Implement the Snatch3r class as needed when working the sandox exercises
+# DONE: Implement the Snatch3r class as needed when working the sandox exercises
 import ev3dev.ev3 as ev3
-import math
 import time
-import ev3_delegates
 import mqtt_remote_method_calls as com
 
 
@@ -31,6 +29,9 @@ class Snatch3r(object):
         self.color_sensor = ev3.ColorSensor()
         self.ir_sensor = ev3.InfraredSensor()
         self.pixy = ev3.Sensor(drive_name="pixy-lego")
+        self.mqtt_client = com.MqttClient()
+        self.mqtt_client.connect_to_pc()
+
 
     def drive_forever(self):
         assert self.left_motor.connected
