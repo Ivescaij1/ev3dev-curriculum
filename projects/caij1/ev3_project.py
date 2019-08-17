@@ -7,7 +7,6 @@ import turtle_warrior as tw
 import robot_controller as robo
 import ev3dev.ev3 as ev3
 import mqtt_remote_method_calls as com
-import ev3_delegates
 import time
 
 
@@ -52,8 +51,6 @@ class MqttConnect(object):
         delegate = PcDelegate()
         mqtt_client = com.MqttClient(delegate)
         mqtt_client.connect_to_ev3()
-        delegate.loop_forever()
-        print("Shutdown complete.")
 
 
 class PcDelegate(object):
