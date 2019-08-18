@@ -156,7 +156,7 @@ class MqttClient(object):
           :type mqtt_broker_ip_address: str
           :type lego_robot_number: int
         """
-        self.connect("msg4pc", "msg4ev3", mqtt_broker_ip_address, lego_robot_number)
+        self.connect("msg4ev3", "msg4ev3", mqtt_broker_ip_address, lego_robot_number)
 
     def connect_to_pc(self, mqtt_broker_ip_address="broker.hivemq.com", lego_robot_number=LEGO_NUMBER):
         """

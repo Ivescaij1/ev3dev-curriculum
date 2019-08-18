@@ -16,7 +16,7 @@ class DataContainer(object):
         self.warrior = None
         self.turtle = None
         self.robot = None
-        self.mqtt = MqttConnect()
+        self.mqtt = None
 
         self.save = tw.Warrior()
         self.save.state = False
