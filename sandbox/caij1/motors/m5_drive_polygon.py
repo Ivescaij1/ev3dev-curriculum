@@ -8,8 +8,10 @@ Then your robot will drive that polygon shape.
 Authors: David Fisher and Junfei Cai.
 """  # DONE: 1. PUT YOUR NAME IN THE ABOVE LINE.
 
+import sys
+sys.path.append("..")
 import ev3dev.ev3 as ev3
-import robot_controller as robo
+import home.robot.csse120.libs.robot_controller as robo
 
 
 def main():
